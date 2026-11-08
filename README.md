@@ -4,12 +4,13 @@ Personal styling hub, digital wardrobe manager and outfit planner. A single-file
 
 ## Layout
 
-- `public/` – the site Cloudflare Pages serves
+- `public/` – static files the Worker serves
   - `index.html` – the whole app (HTML, CSS, JS)
   - `sw.js` – service worker for offline use (never caches `/api`)
   - `manifest.webmanifest`, `icon-*.png` – home-screen install
   - `_headers` – no-cache on the shell so updates land
-- `functions/api/[[path]].js` – sync API (sign-in, state, photos), backed by Cloudflare D1
+- `src/worker.js` – Worker: serves `public/`, plus the sync API under `/api` (sign-in, state, photos), backed by Cloudflare D1
+- `wrangler.jsonc` – Worker config (name, assets, D1 binding)
 
 ## How sync works
 
@@ -19,17 +20,15 @@ Personal styling hub, digital wardrobe manager and outfit planner. A single-file
 - If two devices edit at once, changes are merged item by item. When both devices changed the same item, the last one saved wins.
 - Signing in issues a 90-day token per device. Changing `PASSWORD` signs out every device.
 
-## Cloudflare Pages setup
+## Cloudflare setup (Worker with static assets)
 
-Settings → Build:
-- Build command: none
-- Build output directory: `public`
+Config lives in `wrangler.jsonc`. In the dashboard:
 
-Settings → Bindings → add **D1 database**, variable name `DB`. Tables are created automatically on first request.
-
-Settings → Variables and Secrets (type **Secret**, Production):
-- `PASSWORD` – what you type to sign in. Use a long one.
-- `SESSION_SECRET` – a long random string (`openssl rand -base64 32`)
+1. Storage & Databases → D1 → create `raestyle`, and copy its ID into `database_id` in `wrangler.jsonc`. Tables are created automatically on first request.
+2. Worker → Settings → Variables and Secrets, add as **Secret**:
+   - `PASSWORD` – what you type to sign in. Use a long one.
+   - `SESSION_SECRET` – a long random string (`openssl rand -base64 32`)
+3. Worker → Settings → Build: deploy command `npx wrangler deploy`, no build command, root directory `/`.
 
 Every push to `main` deploys. When shipping changes, bump `CACHE` in `public/sw.js`.
 
@@ -37,7 +36,7 @@ Every push to `main` deploys. When shipping changes, bump `CACHE` in `public/sw.
 
 ```sh
 printf 'PASSWORD=test-pass\nSESSION_SECRET=dev\n' > .dev.vars
-npx wrangler pages dev public --d1 DB
+npx wrangler dev
 ```
 
 Then open http://localhost:8788. The local database lives in `.wrangler/` (gitignored).

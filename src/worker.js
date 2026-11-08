@@ -1,4 +1,4 @@
-// Raestyle sync API (Cloudflare Pages Function, D1 bound as DB).
+// Raestyle Worker: serves public/ as static assets, plus the sync API under /api (D1 bound as DB).
 // Secrets: PASSWORD (what you type to sign in), SESSION_SECRET (long random string).
 //
 // POST /api/login        {password}            -> {token}
@@ -42,9 +42,16 @@ async function authed(request, env) {
   return same(m[2], await hmac(env, 'raestyle:' + m[1]));
 }
 
-export async function onRequest({ request, env, params }) {
+export default {
+  fetch(request, env) {
+    const { pathname } = new URL(request.url);
+    // static files are matched before the Worker runs; anything else outside /api is the app shell
+    return pathname.startsWith('/api/') ? api(request, env, pathname.slice(5)) : env.ASSETS.fetch(request);
+  },
+};
+
+async function api(request, env, path) {
   if (!env.DB || !env.PASSWORD || !env.SESSION_SECRET) return json({ error: 'Server not configured' }, 500);
-  const path = (params.path || []).join('/');
   const method = request.method;
 
   if (path === 'login' && method === 'POST') {

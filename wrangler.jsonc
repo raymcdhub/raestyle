@@ -1,0 +1,13 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // must match the Worker's name in the Cloudflare dashboard
+  "name": "raestyle",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-10-01",
+  "assets": { "directory": "./public", "binding": "ASSETS" },
+  "d1_databases": [
+    // database_id: Storage & Databases → D1 → raestyle
+    { "binding": "DB", "database_name": "raestyle", "database_id": "REPLACE_WITH_D1_DATABASE_ID" }
+  ]
+  // PASSWORD and SESSION_SECRET are secrets, set in the dashboard (Settings → Variables and Secrets)
+}

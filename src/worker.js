@@ -51,7 +51,8 @@ export default {
 };
 
 async function api(request, env, path) {
-  if (!env.DB || !env.PASSWORD || !env.SESSION_SECRET) return json({ error: 'Server not configured' }, 500);
+  const missing = ['DB', 'PASSWORD', 'SESSION_SECRET'].filter(k => !env[k]);
+  if (missing.length) return json({ error: 'Server not configured: missing ' + missing.join(', ') }, 500);
   const method = request.method;
 
   if (path === 'login' && method === 'POST') {

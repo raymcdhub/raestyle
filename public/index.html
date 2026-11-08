@@ -320,6 +320,22 @@ textarea.notes:focus{border-color:var(--tiff);box-shadow:0 0 0 3px var(--tiff-so
 #tabs .tb{position:absolute;top:0;right:calc(50% - 22px);background:var(--burg);color:#fff;font-size:9.5px;border-radius:8px;padding:0 5px;line-height:15px}
 .drawer-shade{display:none;position:fixed;inset:0;background:rgba(15,15,15,.2);z-index:49}
 @media (max-width:760px){#tabs{display:flex}input.big-title{font-size:30px !important}#tname{font-size:32px !important}.sudoku[style]{grid-template-columns:66px repeat(var(--cols),minmax(0,1fr)) !important}.sudoku .rh input{font-size:12.5px !important;font-family:var(--sans);font-weight:600}.rowcheck .rc-t{display:none}.pv:has(#ts){flex-wrap:wrap !important}.tab{white-space:nowrap;flex:none}.fsel{flex:none}}
+/* ---------- Sign-in gate ---------- */
+body.gated #app,body.gated #peek,body.gated #modal,body.gated #tabs{visibility:hidden}
+#gate{position:fixed;inset:0;z-index:100;background:var(--paper);display:grid;place-items:center;padding:24px 16px calc(24px + env(safe-area-inset-bottom))}
+#gate[hidden]{display:none}
+.gate-card{width:min(340px,100%);display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px}
+.gate-card .logo{width:56px;height:56px;border-radius:12px;font-size:36px}
+.gate-card .logo:after{top:23px;height:8px}
+.gate-card h1{font-family:var(--serif);font-size:34px;margin:4px 0 0;font-weight:700}
+.gate-card p{color:var(--muted);margin:0 0 8px;line-height:1.5}
+#gateLogin,#gateChoice{display:flex;flex-direction:column;gap:10px;width:100%}
+#gateLogin[hidden],#gateChoice[hidden]{display:none}
+#gatePw{width:100%;border:1px solid var(--line2);border-radius:8px;padding:12px 14px;font-size:16px;outline:none;background:#fff}
+#gatePw:focus{border-color:var(--tiff);box-shadow:0 0 0 3px var(--tiff-soft)}
+.gate-card .btn{justify-content:center;padding:11px 14px;font-size:15px}
+.gate-msg{min-height:20px;font-size:13px;color:var(--burg)}
+.vh{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
 </style>
 </head>
 <body>
@@ -328,6 +344,23 @@ textarea.notes:focus{border-color:var(--tiff);box-shadow:0 0 0 3px var(--tiff-so
 <div id="modal"></div>
 <div id="toast"></div>
 <nav id="tabs"></nav>
+<div id="gate" hidden>
+  <form class="gate-card" id="gateForm">
+    <div class="logo"><span>R</span></div>
+    <h1>Raestyle</h1>
+    <p id="gateText">Sign in to open your wardrobe.</p>
+    <div id="gateLogin">
+      <input class="vh" type="text" name="username" autocomplete="username" value="raestyle" tabindex="-1" aria-hidden="true">
+      <input id="gatePw" type="password" name="password" autocomplete="current-password" placeholder="Password" required>
+      <button class="btn primary" id="gateBtn">Sign in</button>
+    </div>
+    <div id="gateChoice" hidden>
+      <button type="button" class="btn primary" data-pick="cloud">Use the synced copy</button>
+      <button type="button" class="btn" data-pick="local">Replace it with this device’s</button>
+    </div>
+    <div class="gate-msg" id="gateMsg"></div>
+  </form>
+</div>
 <div class="drawer-shade" data-act="menu"></div>
 
 <script>
@@ -480,7 +513,7 @@ async function load(){
   try{ const r=localStorage.getItem(LS_KEY); return r?JSON.parse(r):null; }catch(e){ return null; }
 }
 let saveWarned=false, saveT=null;
-function save(){ clearTimeout(saveT); saveT=setTimeout(flush,250); }
+function save(){ clearTimeout(saveT); saveT=setTimeout(flush,250); Sync.changed(); }
 async function flush(){
   const json=JSON.stringify(S);
   try{ await idbSet(LS_KEY,json); return; }catch(e){}
@@ -831,8 +864,15 @@ function pageRepairs(){
 /* ---------- Data ---------- */
 function pageData(){
   return `${pageIcon('sliders','var(--ink)')}<h1 class="title">Data & settings</h1>
-  <p class="lede">Raestyle keeps everything on this device. Export a backup to move it to another device, or reset to the demo data.</p>
-  <div class="callout orange"><div class="ci" style="color:#A8470C">${ic('alert',20)}</div><div>Your data lives on this device. Deleting the app or clearing Safari’s website data removes it. Export a backup now and then.</div></div>
+  <p class="lede">Raestyle syncs across every device you’re signed in on, and each device keeps its own copy so it works offline.</p>
+  <div class="callout ${Sync.status==='offline'?'orange':'tiff'}"><div class="ci">${ic(Sync.status==='offline'?'alert':'refresh',20)}</div><div>${
+    Sync.status==='syncing'?'Syncing…':Sync.status==='offline'?'Can’t reach the server. Changes are saved here and will sync when you’re back online.'
+    :Sync.when?`Synced at ${new Date(Sync.when).toLocaleTimeString('en-IE',{hour:'2-digit',minute:'2-digit'})}.`:'Checking sync…'
+  } Exporting a backup now and then is still worth it.</div></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button class="btn" data-act="syncNow">${ic('refresh',15)} Sync now</button><button class="btn" data-act="signOut">${ic('x',15)} Sign out of this device</button>
+  </div>
+  <div class="divider"></div>
   <div style="display:flex;gap:8px;flex-wrap:wrap">
     <button class="btn" data-act="exportData">${ic('upload',15)} Export backup</button><button class="btn" data-act="importData">${ic('download',15)} Import backup</button>
     <button class="btn" data-act="resetDemo">${ic('refresh',15)} Load demo data</button><button class="btn danger" data-act="clearAll">${ic('trash',15)} Start empty</button>
@@ -1080,8 +1120,10 @@ const A={
   doImport(){ try{ const d=JSON.parse(document.getElementById('m_text').value); if(!d.wardrobes||!d.items) throw 0; S=d; UI.modal=null; UI.tripId=null; save(); toast('Backup imported'); }catch(e){ toast('That doesn’t look like a Raestyle backup'); } },
   copyText(){ const ta=document.getElementById('m_text'); const done=()=>toast('Copied');
     try{ navigator.clipboard.writeText(ta.value).then(done,()=>{ ta.select(); toast('Selected. Press Ctrl/Cmd + C to copy.'); }); }catch(e){ ta.select(); toast('Selected. Press Ctrl/Cmd + C to copy.'); } return 'norender'; },
-  resetDemo(){ ask('Load demo data?','This replaces everything with the Dublin & Rio example wardrobes.','Load demo',()=>{ S=seed(); UI.tripId=null; save(); },false); return 'norender'; },
-  clearAll(){ ask('Start with an empty workspace?','All items, outfits, wishlist and trips will be removed. Export a backup first if you want to keep them.','Start empty',()=>{ S={current:'w_home',wardrobes:[{id:'w_home',name:'Home',icon:'🏠',city:'',accent:'orange',notes:''}],items:[],wishlist:[],outfits:[],trips:[]}; UI.tripId=null; save(); }); return 'norender'; },
+  resetDemo(){ ask('Load demo data?','This replaces everything, on every synced device, with the Dublin & Rio example wardrobes.','Load demo',()=>{ S=seed(); UI.tripId=null; save(); },false); return 'norender'; },
+  clearAll(){ ask('Start with an empty workspace?','All items, outfits, wishlist and trips will be removed from every synced device. Export a backup first if you want to keep them.','Start empty',()=>{ S={current:'w_home',wardrobes:[{id:'w_home',name:'Home',icon:'🏠',city:'',accent:'orange',notes:''}],items:[],wishlist:[],outfits:[],trips:[]}; UI.tripId=null; save(); }); return 'norender'; },
+  syncNow(){ Sync.pull(); return 'norender'; },
+  signOut(){ Sync.signOut(); return 'norender'; },
   modalClose(){ UI.modal=null; },
   confirmYes(){ UI.modal=null; const f=pendingConfirm; pendingConfirm=null; f&&f(); },
 };
@@ -1121,13 +1163,168 @@ function resizeImage(file,max){
 }
 function fromHash(){ const h=(location.hash||'').slice(1); if(['closet','wishlist','outfits','travel','repairs','data'].includes(h)){ UI.view=h; UI.tripId=null; } }
 window.addEventListener('hashchange',()=>{ fromHash(); render(); });
+function normalize(){
+  // migrate older saves to the new wording
+  const fix=v=>v==='All-year'?'All year':v==='T-shirt'?'Tee':v;
+  [...(S.items||[]),...(S.wishlist||[]),...(S.outfits||[])].forEach(o=>{ if(o.category) o.category=fix(o.category); if(Array.isArray(o.seasons)) o.seasons=o.seasons.map(fix); });
+  if(!S.current || (S.current!=='all' && !W(S.current))) S.current=S.wardrobes[0]?.id||'all';
+}
+
+/* ---------- Sync: this device keeps a full copy; D1 (via /api) is shared ---------- */
+const TOKEN_KEY='raestyle-token', SYNC_KEY='raestyle-sync', BASE_KEY='raestyle-base';
+const isPhoto=o=>o&&typeof o.image==='string';
+const eachObj=(d,f)=>{ for(const k in d) if(Array.isArray(d[k])) d[k].forEach(o=>{ if(o&&typeof o==='object') f(o); }); };
+const Sync={
+  token:null, base:null, rev:0, dirty:false, gen:0, busy:false, t:null, status:'', when:0, hashes:new Map(), sent:new Set(),
+  async init(){
+    try{ this.token=localStorage.getItem(TOKEN_KEY); }catch(e){}
+    try{ const m=await idbGet(SYNC_KEY); if(m){ this.rev=m.rev||0; this.dirty=!!m.dirty; this.sent=new Set(m.sent||[]); } }catch(e){}
+    try{ this.base=await idbGet(BASE_KEY)||null; }catch(e){}
+  },
+  meta(){ idbSet(SYNC_KEY,{rev:this.rev,dirty:this.dirty,sent:[...this.sent]}).catch(()=>{}); },
+  setStatus(s){ this.status=s; if(s==='ok') this.when=Date.now(); if(UI.view==='data'&&!document.body.classList.contains('gated')) render(); },
+  async api(path,opt={}){
+    const r=await fetch('/api/'+path,{...opt,headers:{...(opt.headers||{}),authorization:'Bearer '+this.token}});
+    if(r.status===401){ this.token=null; try{ localStorage.removeItem(TOKEN_KEY); }catch(e){} Gate.open().then(()=>this.pull()); throw new Error('signed out'); }
+    return r;
+  },
+  async hash(s){
+    if(this.hashes.has(s)) return this.hashes.get(s);
+    const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));
+    const h=[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join(''); this.hashes.set(s,h); return h;
+  },
+  // photos go up once each and travel as "img:<sha256>" inside the state
+  async pack(){
+    const d=JSON.parse(JSON.stringify(S)), objs=[]; eachObj(d,o=>{ if(isPhoto(o)&&o.image.startsWith('data:')) objs.push(o); });
+    for(const o of objs){
+      const id=await this.hash(o.image);
+      if(!this.sent.has(id)){ const r=await this.api('img/'+id,{method:'PUT',body:o.image}); if(!r.ok) throw new Error('photo upload failed'); this.sent.add(id); }
+      o.image='img:'+id;
+    }
+    return JSON.stringify(d);
+  },
+  async unpack(data){
+    const d=JSON.parse(data), have=new Map(), want=new Set();
+    const mine=[]; eachObj(S||{},o=>{ if(isPhoto(o)&&o.image.startsWith('data:')) mine.push(o.image); });
+    for(const s of mine) have.set(await this.hash(s),s);
+    eachObj(d,o=>{ if(isPhoto(o)&&o.image.startsWith('img:')){ const id=o.image.slice(4); this.sent.add(id); if(!have.has(id)) want.add(id); } });
+    const ids=[...want];
+    for(let i=0;i<ids.length;i+=6) await Promise.all(ids.slice(i,i+6).map(async id=>{ const r=await this.api('img/'+id); if(r.status===404){ have.set(id,''); return; } if(!r.ok) throw new Error('photo download failed'); have.set(id,await r.text()); }));
+    eachObj(d,o=>{ if(isPhoto(o)&&o.image.startsWith('img:')) o.image=have.get(o.image.slice(4))||''; });
+    return d;
+  },
+  setBase(data){ this.base=data; idbSet(BASE_KEY,data).catch(()=>{}); },
+  async apply(b){ S=await this.unpack(b.data); this.rev=b.rev; this.dirty=false; this.setBase(b.data); normalize(); this.meta(); await flush(); render(); },
+  // three-way merge by id: keep what this device added, edited or deleted since the last sync, take the rest from the server
+  merge(base,mine,theirs){
+    const out={...theirs}, str=JSON.stringify;
+    for(const k of new Set([...Object.keys(mine),...Object.keys(base)])){
+      const b=base[k], m=mine[k], t=theirs[k];
+      if(Array.isArray(m)&&Array.isArray(t)&&[...m,...t].every(o=>o&&o.id)){
+        const bi=new Map((Array.isArray(b)?b:[]).map(o=>[o.id,str(o)])), mi=new Map(m.map(o=>[o.id,o])), ti=new Set(t.map(o=>o.id));
+        out[k]=t.filter(o=>!(bi.has(o.id)&&!mi.has(o.id)))
+          .map(o=>mi.has(o.id)&&str(mi.get(o.id))!==bi.get(o.id)?mi.get(o.id):o)
+          .concat(m.filter(o=>!ti.has(o.id)&&!bi.has(o.id)));
+      } else if(str(m)!==str(b)) out[k]=m;
+    }
+    return out;
+  },
+  changed(){ if(!this.token) return; this.gen++; this.dirty=true; this.meta(); clearTimeout(this.t); this.t=setTimeout(()=>this.push(),1500); },
+  async push(){
+    if(!this.token||this.busy||!this.dirty) return;
+    this.busy=true; clearTimeout(this.t); this.setStatus('syncing');
+    const g=this.gen; let again=false;
+    try{
+      const data=await this.pack();
+      const r=await this.api('state',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({base:this.rev,data})});
+      const b=await r.json();
+      if(r.ok){ this.rev=b.rev; this.setBase(data); this.dirty=this.gen!==g; again=this.dirty; }
+      else if(r.status===409&&!b.data){ this.rev=0; again=true; }   // server was emptied: re-upload
+      else if(r.status===409&&this.base){
+        const merged=JSON.stringify(this.merge(JSON.parse(this.base),JSON.parse(data),JSON.parse(b.data)));
+        S=await this.unpack(merged); normalize(); this.rev=b.rev; this.setBase(b.data); await flush(); render();
+        again=true; toast('Merged with changes from another device');
+      }
+      else if(r.status===409){ await this.apply(b); toast('Updated from another device'); }
+      else throw new Error(b.error);
+      this.meta(); this.setStatus('ok');
+    }catch(e){ this.setStatus('offline'); }
+    finally{ this.busy=false; }
+    if(again) this.push();
+  },
+  async pull(){
+    if(!this.token||this.busy) return;
+    if(this.dirty) return this.push();
+    this.busy=true; let upload=false;
+    try{
+      const r=await this.api('state?rev='+this.rev), b=await r.json(); if(!r.ok) throw new Error(b.error);
+      if(b.data&&b.rev!==this.rev) await this.apply(b);
+      else if(!b.rev){ this.dirty=upload=true; }   // nothing synced yet: this device seeds it
+      this.setStatus('ok');
+    }catch(e){ this.setStatus('offline'); }
+    finally{ this.busy=false; }
+    if(upload) this.push();
+  },
+  signOut(){
+    const go=async()=>{
+      try{ localStorage.removeItem(TOKEN_KEY); localStorage.removeItem(LS_KEY); }catch(e){}
+      try{ await idbSet(LS_KEY,''); await idbSet(SYNC_KEY,null); await idbSet(BASE_KEY,null); }catch(e){}
+      location.reload();
+    };
+    if(this.dirty) ask('Sign out with unsynced changes?','Some changes on this device haven’t reached the server yet. Signing out deletes them.','Sign out',go);
+    else ask('Sign out of this device?','Your wardrobe stays synced. This device forgets its copy until you sign in again.','Sign out',go,false);
+  },
+};
+
+/* Gate: full-screen sign-in; resolves once this device has a token and is synced */
+const Gate={
+  p:null,
+  open(hadLocal=false){
+    if(this.p) return this.p;
+    const g=document.getElementById('gate'), pw=document.getElementById('gatePw'), msg=document.getElementById('gateMsg'), btn=document.getElementById('gateBtn');
+    document.body.classList.add('gated'); g.hidden=false; msg.textContent='';
+    document.getElementById('gateLogin').hidden=false; document.getElementById('gateChoice').hidden=true;
+    document.getElementById('gateText').textContent='Sign in to open your wardrobe.';
+    return this.p=new Promise(done=>{
+      const finish=()=>{ g.hidden=true; document.body.classList.remove('gated'); this.p=null; pw.value=''; done(); };
+      document.getElementById('gateForm').onsubmit=async e=>{
+        e.preventDefault(); msg.textContent=''; btn.disabled=true; btn.textContent='Signing in…';
+        try{
+          const r=await fetch('/api/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({password:pw.value})});
+          const b=await r.json().catch(()=>({}));
+          if(!r.ok) throw new Error(b.error||'Couldn’t sign in');
+          Sync.token=b.token; try{ localStorage.setItem(TOKEN_KEY,b.token); }catch(e){}
+          if(Sync.rev) return finish();   // re-sign-in on a device that already syncs
+          const s=await Sync.api('state'), st=await s.json();
+          if(!st.data){ Sync.dirty=true; finish(); Sync.push(); return; }
+          if(!hadLocal){ await Sync.apply(st); return finish(); }
+          // this device has its own data from before sync: ask which copy wins
+          document.getElementById('gateLogin').hidden=true; document.getElementById('gateChoice').hidden=false;
+          document.getElementById('gateText').textContent='This device has its own wardrobe, and a synced one already exists. Which should every device use?';
+          document.querySelectorAll('#gateChoice [data-pick]').forEach(b2=>b2.onclick=async()=>{
+            if(b2.dataset.pick==='cloud') await Sync.apply(st);
+            else{ Sync.rev=st.rev; Sync.dirty=true; Sync.push(); }
+            finish();
+          });
+        }catch(err){ msg.textContent=navigator.onLine===false?'You’re offline. Connect to sign in.':err.message; }
+        finally{ btn.disabled=false; btn.textContent='Sign in'; }
+      };
+      setTimeout(()=>pw.focus(),50);
+    });
+  },
+};
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') Sync.pull(); else if(Sync.dirty) Sync.push(); });
+window.addEventListener('online',()=>Sync.pull());
+setInterval(()=>{ if(document.visibilityState==='visible') Sync.pull(); },30000);
+
 (async()=>{
-S = (await load()) || seed();
-// migrate older saves to the new wording
-const fix=v=>v==='All-year'?'All year':v==='T-shirt'?'Tee':v;
-[...(S.items||[]),...(S.wishlist||[]),...(S.outfits||[])].forEach(o=>{ if(o.category) o.category=fix(o.category); if(Array.isArray(o.seasons)) o.seasons=o.seasons.map(fix); });
-if(!S.current || (S.current!=='all' && !W(S.current))) S.current=S.wardrobes[0]?.id||'all';
+const local=await load();
+S = local || seed();
+normalize();
+await Sync.init();
+if(!Sync.token) await Gate.open(!!local);
 fromHash(); render();
+Sync.pull();
 try{ navigator.storage&&navigator.storage.persist&&navigator.storage.persist().catch(()=>{}); }catch(e){}
 try{ if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js').catch(()=>{}); }catch(e){}
 })();

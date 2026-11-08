@@ -1,34 +1,43 @@
 # Raestyle
 
-Personal styling hub, digital wardrobe manager and outfit planner. A single-file PWA installed to the iPhone home screen.
+Personal styling hub, digital wardrobe manager and outfit planner. A single-file PWA, installed to the iPhone home screen and synced across devices.
 
-## Files
+## Layout
 
-- `index.html` – the whole app (HTML, CSS, JS)
-- `sw.js` – service worker for offline use
-- `manifest.webmanifest`, `icon-*.png` – home-screen install
-- `_headers` – Cloudflare Pages headers (no-cache on the shell so updates land)
+- `public/` – the site Cloudflare Pages serves
+  - `index.html` – the whole app (HTML, CSS, JS)
+  - `sw.js` – service worker for offline use (never caches `/api`)
+  - `manifest.webmanifest`, `icon-*.png` – home-screen install
+  - `_headers` – no-cache on the shell so updates land
+- `functions/api/[[path]].js` – sync API (sign-in, state, photos), backed by Cloudflare D1
 
-## Data
+## How sync works
 
-Everything is stored on the device in IndexedDB (localStorage fallback), keyed to the site's origin. Nothing is sent to a server.
+- Each device keeps a full copy in IndexedDB, so the app opens instantly and works offline.
+- Changes upload about 1.5s after you stop editing. The app pulls when it opens, when it comes back to the foreground, and every 30s while it's open.
+- The whole wardrobe is one JSON document with a revision number. Photos are stored separately, once each, by SHA-256.
+- If two devices edit at once, changes are merged item by item. When both devices changed the same item, the last one saved wins.
+- Signing in issues a 90-day token per device. Changing `PASSWORD` signs out every device.
 
-- Use **Export backup** in the app regularly; the backup file is the only copy outside the phone.
-- Don't change the deploy domain. A new domain is a new origin and starts with an empty wardrobe (restore with Import).
+## Cloudflare Pages setup
 
-## Deploy
-
-Hosted on Cloudflare Pages, connected to this repo. Every push to `main` deploys.
-
+Settings → Build:
 - Build command: none
-- Output directory: `/`
+- Build output directory: `public`
 
-When shipping changes, bump `CACHE` in `sw.js` (e.g. `raestyle-v3`) so old cached files are cleared.
+Settings → Bindings → add **D1 database**, variable name `DB`. Tables are created automatically on first request.
+
+Settings → Variables and Secrets (type **Secret**, Production):
+- `PASSWORD` – what you type to sign in. Use a long one.
+- `SESSION_SECRET` – a long random string (`openssl rand -base64 32`)
+
+Every push to `main` deploys. When shipping changes, bump `CACHE` in `public/sw.js`.
 
 ## Run locally
 
 ```sh
-python3 -m http.server 8000
+printf 'PASSWORD=test-pass\nSESSION_SECRET=dev\n' > .dev.vars
+npx wrangler pages dev public --d1 DB
 ```
 
-Then open http://localhost:8000. The service worker only registers over HTTPS, so offline mode is only testable on the deployed site.
+Then open http://localhost:8788. The local database lives in `.wrangler/` (gitignored).

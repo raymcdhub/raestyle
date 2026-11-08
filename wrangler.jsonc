@@ -7,7 +7,7 @@
   "assets": { "directory": "./public", "binding": "ASSETS" },
   "d1_databases": [
     // database_id: Storage & Databases → D1 → raestyle
-    { "binding": "DB", "database_name": "raestyle", "database_id": "REPLACE_WITH_D1_DATABASE_ID" }
+    { "binding": "DB", "database_name": "raestyle", "database_id": "0f0e30eb-1281-447d-87c1-6e39e3508c92" }
   ]
   // PASSWORD and SESSION_SECRET are secrets, set in the dashboard (Settings → Variables and Secrets)
 }

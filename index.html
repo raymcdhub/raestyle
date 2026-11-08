@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Raestyle">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<title>Raestyle · Wardrobe Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#37352F;--muted:#787774;--faint:#9B9A97;--line:#EDECE9;--line2:#E3E2DE;
+  --hover:rgba(55,53,47,.06);--side:#F7F7F5;--paper:#FBFBFA;
+  --orange:#F37021;--orange-soft:#FDEEE3;
+  --green:#154734;--green-soft:#E4EEE8;
+  --burg:#660009;--burg-soft:#F6E6E7;
+  --tiff:#81D8D0;--tiff-soft:#E6F7F5;--tiff-ink:#0E6F68;
+  --serif:'Cormorant Garamond',Georgia,'Times New Roman',serif;
+  --sans:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#fff;color:var(--ink);font-family:var(--sans);font-size:14px;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+#app{display:flex;height:100vh;height:100dvh}
+button,.nav,.card,.chip,.cell,.pick,.tab{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+/* ---------- Sidebar ---------- */
+#side{width:252px;flex:none;background:var(--side);border-right:1px solid var(--line);display:flex;flex-direction:column;overflow-y:auto;padding:10px 8px 16px}
+.brand{display:flex;gap:10px;align-items:center;padding:8px 8px 12px}
+.logo{width:32px;height:32px;border-radius:7px;background:var(--orange);color:#fff;font-family:var(--serif);font-weight:700;font-size:21px;display:grid;place-items:center;position:relative;overflow:hidden}
+.logo:after{content:"";position:absolute;left:0;right:0;top:13px;height:5px;background:#6B3A1E;opacity:.55}
+.logo span{position:relative;z-index:1}
+.brand-name{font-family:var(--serif);font-size:21px;font-weight:700;line-height:1;letter-spacing:.01em}
+.brand-sub{font-size:11.5px;color:var(--muted);margin-top:3px}
+.sec{font-size:11.5px;font-weight:600;color:var(--faint);padding:16px 10px 5px;letter-spacing:.02em;display:flex;align-items:center}
+.sec .add{margin-left:auto;cursor:pointer;border-radius:4px;padding:0 5px;font-size:15px;line-height:18px}
+.sec .add:hover{background:var(--hover);color:var(--ink)}
+.nav{display:flex;align-items:center;gap:9px;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:14px;user-select:none;min-height:30px}
+.nav:hover{background:var(--hover)}
+.nav.on{background:rgba(55,53,47,.08);font-weight:500}
+.nav .ic{width:20px;text-align:center;font-size:15px;display:inline-grid;place-items:center;color:var(--muted)}
+.nav.on .ic{color:var(--ink)}
+.nav .ct{margin-left:auto;font-size:12px;color:var(--faint)}
+.nav .more{display:none;width:20px;height:20px;border-radius:4px;place-items:center;color:var(--muted);margin-left:2px}
+.nav:hover .more{display:grid}
+.nav .more:hover{background:rgba(55,53,47,.1)}
+.badge{font-size:11px;background:var(--burg);color:#fff;border-radius:10px;padding:1px 7px;margin-left:auto;font-weight:500}
+.side-foot{margin-top:auto;padding:16px 10px 0;font-size:11.5px;color:var(--faint);line-height:1.5}
+.palette-strip{display:flex;gap:4px;margin-bottom:8px}
+.palette-strip i{width:16px;height:16px;border-radius:4px;display:block;border:1px solid rgba(0,0,0,.06)}
+/* ---------- Main ---------- */
+#main{flex:1;overflow-y:auto;min-width:0;background:#fff}
+.topbar{position:sticky;top:0;z-index:5;background:rgba(255,255,255,.92);backdrop-filter:blur(6px);display:flex;align-items:center;gap:10px;padding:10px 18px;min-height:46px}
+.crumb{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:14px;min-width:0}
+.crumb b{color:var(--ink);font-weight:500}
+.env{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:3px 9px;border-radius:20px;background:color-mix(in srgb,var(--c) 14%,#fff);color:color-mix(in srgb,var(--c) 75%,#000)}
+.env:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c)}
+.spacer{flex:1}
+svg.i{flex:none;display:inline-block;vertical-align:middle}
+svg.i.fill{fill:currentColor}
+.pgi{width:60px;height:60px;border-radius:14px;display:inline-grid;place-items:center;background:color-mix(in srgb,currentColor 10%,#fff)}
+.empty .big{color:var(--faint)}
+.check svg.i{margin-top:1px}
+.rowcheck svg.i{vertical-align:-2px}
+.btn.menubtn{display:none}
+.page{max-width:1120px;margin:0 auto;padding:28px 56px 90px}
+.page-icon{font-size:56px;line-height:1;margin:10px 0 8px}
+h1.title{font-family:var(--serif);font-size:44px;font-weight:700;margin:0 0 6px;line-height:1.08;letter-spacing:-.005em}
+.lede{color:var(--muted);font-size:15px;margin:0 0 22px;max-width:680px;line-height:1.55}
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 22px}
+.stat{border:1px solid var(--line);border-radius:8px;padding:10px 14px;min-width:130px;background:#fff}
+.stat .n{font-family:var(--serif);font-size:28px;font-weight:700;line-height:1}
+.stat .l{font-size:12px;color:var(--muted);margin-top:4px}
+.toolbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:16px}
+.tab{padding:5px 9px;border-radius:5px;cursor:pointer;color:var(--muted);font-size:13.5px;display:inline-flex;gap:6px;align-items:center;border:0;background:none}
+.tab:hover{background:var(--hover)}
+.tab.on{color:var(--ink);box-shadow:inset 0 -2px 0 var(--ink);border-radius:5px 5px 0 0}
+.search{border:1px solid var(--line2);border-radius:6px;padding:5px 9px;min-width:180px;background:#fff;outline:none}
+.search:focus{border-color:var(--tiff);box-shadow:0 0 0 3px var(--tiff-soft)}
+.fsel{border:1px solid transparent;background:none;border-radius:6px;padding:5px 6px;color:var(--muted);cursor:pointer;font-size:13.5px;max-width:150px}
+.fsel:hover{background:var(--hover)}
+.fsel.set{background:var(--tiff-soft);color:var(--tiff-ink);border-color:color-mix(in srgb,var(--tiff) 50%,#fff)}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line2);background:#fff;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:13.5px;font-weight:500;white-space:nowrap}
+.btn:hover{background:var(--paper)}
+.btn.primary{background:var(--orange);border-color:var(--orange);color:#fff}
+.btn.primary:hover{background:#E1621A}
+.btn.green{background:var(--green);border-color:var(--green);color:#fff}
+.btn.green:hover{background:#0F3628}
+.btn.ghost{border-color:transparent;background:none;color:var(--muted)}
+.btn.ghost:hover{background:var(--hover);color:var(--ink)}
+.btn.danger{color:var(--burg);border-color:color-mix(in srgb,var(--burg) 25%,#fff)}
+.btn.danger:hover{background:var(--burg-soft)}
+.btn.sm{padding:3px 8px;font-size:12.5px}
+.empty{border:1px dashed var(--line2);border-radius:10px;padding:40px;text-align:center;color:var(--muted)}
+.empty .big{font-size:34px;margin-bottom:6px}
+/* ---------- Gallery ---------- */
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
+.card{border:1px solid var(--line);border-radius:8px;overflow:hidden;cursor:pointer;background:#fff;transition:box-shadow .15s,transform .15s;position:relative}
+.card:hover{box-shadow:0 4px 18px rgba(15,15,15,.08);transform:translateY(-1px)}
+.card .body{padding:10px 12px 12px}
+.card .nm{font-weight:500;line-height:1.3;margin-bottom:2px}
+.card .br{font-size:12.5px;color:var(--muted);margin-bottom:8px}
+.card .flag{position:absolute;top:8px;right:8px;display:flex;gap:4px}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;padding:2px 7px;border-radius:4px;background:#F1F1EF;color:#5A5955;white-space:nowrap}
+.pill.t{background:var(--tiff-soft);color:var(--tiff-ink)}
+.pill.o{background:var(--orange-soft);color:#A8470C}
+.pill.g{background:var(--green-soft);color:var(--green)}
+.pill.b{background:var(--burg-soft);color:var(--burg)}
+.pill.w{background:rgba(255,255,255,.92);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.pills{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+.dots{display:inline-flex;gap:3px;align-items:center}
+.dot{width:12px;height:12px;border-radius:50%;border:1px solid rgba(0,0,0,.14);display:inline-block;flex:none}
+.th{background:linear-gradient(180deg,#F8F7F4,#F1EFEA);display:grid;place-items:center;aspect-ratio:1/1;overflow:hidden}
+.th svg{width:66%;height:66%;filter:drop-shadow(0 3px 5px rgba(0,0,0,.08))}
+.th img{width:100%;height:100%;object-fit:cover}
+.card .th{aspect-ratio:4/3.6}
+/* ---------- Table ---------- */
+.tbl{width:100%;border-collapse:collapse;font-size:13.5px}
+.tbl th{text-align:left;font-weight:500;color:var(--muted);font-size:12.5px;padding:7px 10px;border-bottom:1px solid var(--line);border-top:1px solid var(--line);white-space:nowrap}
+.tbl th+th,.tbl td+td{border-left:1px solid var(--line)}
+.tbl td{padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tbl tr.row{cursor:pointer}
+.tbl tr.row:hover td{background:var(--paper)}
+.tbl .mini{width:30px;height:30px;border-radius:5px;flex:none}
+.tbl .mini.th svg{width:80%;height:80%}
+.namecell{display:flex;gap:10px;align-items:center;font-weight:500}
+.tblwrap{overflow-x:auto}
+/* ---------- Peek panel ---------- */
+#peek .shade,#modal .shade{position:fixed;inset:0;background:rgba(15,15,15,.18);z-index:40;animation:fade .15s}
+.panel{position:fixed;top:0;right:0;bottom:0;width:min(560px,100%);background:#fff;z-index:41;box-shadow:-10px 0 40px rgba(15,15,15,.12);display:flex;flex-direction:column;animation:slide .2s ease-out}
+@keyframes slide{from{transform:translateX(30px);opacity:.4}to{transform:none;opacity:1}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.panel-top{display:flex;align-items:center;gap:6px;padding:10px 14px;border-bottom:1px solid var(--line)}
+.panel-body{overflow-y:auto;padding:22px 34px 60px;flex:1}
+.hero{width:100%;border-radius:10px;overflow:hidden;margin-bottom:14px;position:relative}
+.hero .th{aspect-ratio:16/9}
+.hero .th svg{width:42%;height:70%}
+.hero .acts{position:absolute;bottom:10px;right:10px;display:flex;gap:6px}
+.big-title{font-family:var(--serif);font-size:34px;font-weight:700;border:0;outline:none;width:100%;padding:0;margin:4px 0 14px;background:none;line-height:1.15}
+.big-title::placeholder{color:#D3D1CB}
+.props{display:grid;grid-template-columns:150px 1fr;row-gap:2px;align-items:start}
+.pk{display:flex;align-items:center;gap:7px;color:var(--muted);padding:6px 6px;font-size:13.5px;min-height:32px}
+.pk .pi{width:16px;text-align:center;opacity:.75;font-size:13px}
+.pv{padding:3px 0;min-height:32px;display:flex;align-items:center;flex-wrap:wrap;gap:4px}
+.pv input[type=text],.pv input[type=number],.pv input[type=date],.pv input[type=url],.pv select{border:1px solid transparent;border-radius:5px;padding:5px 7px;width:100%;background:none;outline:none}
+.pv input:hover,.pv select:hover{background:var(--hover)}
+.pv input:focus,.pv select:focus{background:#fff;border-color:var(--tiff);box-shadow:0 0 0 3px var(--tiff-soft)}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;padding:3px 8px;border-radius:4px;cursor:pointer;border:1px solid var(--line2);color:var(--faint);background:#fff;user-select:none}
+.chip:hover{border-color:#CFCDC7;color:var(--ink)}
+.chip.on{background:var(--tiff-soft);border-color:color-mix(in srgb,var(--tiff) 70%,#fff);color:var(--tiff-ink)}
+.chip.on.c{background:#fff;border-color:var(--ink);color:var(--ink)}
+.counter{display:inline-flex;align-items:center;gap:2px;border:1px solid var(--line2);border-radius:6px;overflow:hidden}
+.counter button{border:0;background:none;padding:4px 10px;cursor:pointer}
+.counter button:hover{background:var(--hover)}
+.counter span{min-width:26px;text-align:center;font-weight:500}
+.divider{height:1px;background:var(--line);margin:20px 0}
+.callout{display:flex;gap:12px;background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:14px 16px;line-height:1.55;margin:0 0 18px}
+.callout .ci{font-size:20px;line-height:1.2}
+.callout.task{background:var(--burg-soft);border-color:color-mix(in srgb,var(--burg) 15%,#fff)}
+.callout.tiff{background:var(--tiff-soft);border-color:color-mix(in srgb,var(--tiff) 40%,#fff)}
+.callout.orange{background:var(--orange-soft);border-color:color-mix(in srgb,var(--orange) 25%,#fff)}
+h3.sub{font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:4px 0 8px}
+textarea.notes{width:100%;min-height:90px;border:1px solid var(--line);border-radius:8px;padding:10px 12px;resize:vertical;outline:none;line-height:1.5}
+textarea.notes:focus{border-color:var(--tiff);box-shadow:0 0 0 3px var(--tiff-soft)}
+.cpw{font-size:12.5px;color:var(--muted);margin-left:8px}
+/* ---------- Modal ---------- */
+.modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(760px,94vw);max-height:88vh;background:#fff;border-radius:12px;z-index:42;box-shadow:0 20px 70px rgba(15,15,15,.25);display:flex;flex-direction:column;animation:pop .18s ease-out}
+.modal.sm{width:min(460px,94vw)}
+@keyframes pop{from{transform:translate(-50%,-48%) scale(.98);opacity:0}to{transform:translate(-50%,-50%);opacity:1}}
+.modal-h{padding:18px 22px 6px;display:flex;align-items:center;gap:10px}
+.modal-h h2{font-family:var(--serif);font-size:28px;margin:0;font-weight:700}
+.modal-b{padding:8px 22px 18px;overflow-y:auto}
+.modal-f{padding:12px 22px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end;align-items:center}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:5px;font-weight:500}
+.field input,.field select,.field textarea{width:100%;border:1px solid var(--line2);border-radius:6px;padding:8px 10px;outline:none;background:#fff}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--tiff);box-shadow:0 0 0 3px var(--tiff-soft)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.emoji-row{display:flex;flex-wrap:wrap;gap:4px}
+.emoji-row span{width:34px;height:34px;display:grid;place-items:center;border-radius:6px;cursor:pointer;font-size:19px;border:1px solid transparent}
+.emoji-row span:hover{background:var(--hover)}
+.emoji-row span.on{border-color:var(--ink);background:#fff}
+.swatches{display:flex;gap:8px}
+.swatches span{width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid #fff;box-shadow:0 0 0 1px var(--line2)}
+.swatches span.on{box-shadow:0 0 0 2px var(--ink)}
+.picker{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:10px;margin-top:10px}
+.pick{border:1px solid var(--line);border-radius:8px;overflow:hidden;cursor:pointer;background:#fff;position:relative}
+.pick:hover{border-color:#CFCDC7}
+.pick.on{border-color:var(--orange);box-shadow:0 0 0 2px var(--orange-soft)}
+.pick.on:after{content:"";background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");background-size:12px;background-repeat:no-repeat;background-position:center;position:absolute;top:6px;right:6px;width:20px;height:20px;border-radius:50%;background:var(--orange);color:#fff;font-size:12px;display:grid;place-items:center;font-weight:700}
+.pick.off{opacity:.38;cursor:not-allowed}
+.pick .pn{font-size:12px;padding:6px 8px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.strip{display:flex;gap:8px;flex-wrap:wrap;min-height:64px;padding:8px;border:1px dashed var(--line2);border-radius:8px;background:var(--paper)}
+.strip .s{width:56px;border-radius:6px;overflow:hidden;border:1px solid var(--line);background:#fff;position:relative;cursor:pointer}
+.strip .s:hover:after{content:"×";position:absolute;inset:0;background:rgba(102,0,9,.7);color:#fff;display:grid;place-items:center;font-size:20px}
+/* ---------- Outfits ---------- */
+.collage{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--line);aspect-ratio:1/1}
+.collage .th{aspect-ratio:auto;height:100%}
+.collage.n1{grid-template-columns:1fr}
+.collage.n3 .th:first-child{grid-row:span 2}
+.warn{font-size:12px;color:var(--burg);margin-top:6px;display:flex;gap:5px;align-items:flex-start;line-height:1.35}
+/* ---------- Sudoku ---------- */
+.sudoku-wrap{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:28px;align-items:start}
+.sudoku{display:grid;gap:8px}
+.sudoku .h{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center}
+.sudoku .h input{border:0;background:none;width:100%;font:inherit;color:inherit;text-transform:uppercase;letter-spacing:.06em;padding:4px 6px;border-radius:5px;outline:none}
+.sudoku .h input:hover,.sudoku .h input:focus{background:var(--hover)}
+.sudoku .rh{display:flex;flex-direction:column;justify-content:center;gap:6px;padding-right:4px}
+.sudoku .rh input{border:0;background:none;font-family:var(--serif);font-size:19px;font-weight:600;width:100%;padding:2px 6px;border-radius:5px;outline:none}
+.sudoku .rh input:hover,.sudoku .rh input:focus{background:var(--hover)}
+.rowcheck{font-size:11.5px;padding-left:6px}
+.cell{border:1px solid var(--line);border-radius:10px;overflow:hidden;cursor:pointer;background:#fff;position:relative;transition:box-shadow .15s}
+.cell:hover{box-shadow:0 3px 14px rgba(15,15,15,.08)}
+.cell .th{aspect-ratio:1/1}
+.cell .cn{font-size:11.5px;padding:5px 7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-top:1px solid var(--line)}
+.cell.blank{border:1.5px dashed var(--line2);display:grid;place-items:center;aspect-ratio:1/1.16;color:var(--faint);font-size:24px;background:var(--paper)}
+.cell.blank:hover{border-color:var(--orange);color:var(--orange)}
+.side-card{border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:14px}
+.side-card h4{margin:0 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+.big-num{font-family:var(--serif);font-size:46px;font-weight:700;line-height:1;color:var(--green)}
+.check{display:flex;gap:8px;align-items:flex-start;font-size:13px;padding:4px 0;line-height:1.4}
+.check .ok{color:var(--green);font-weight:700}
+.check .no{color:var(--orange);font-weight:700}
+.plan{margin-top:26px}
+.day{display:grid;grid-template-columns:90px 1fr auto;gap:14px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.day .dl{font-family:var(--serif);font-size:20px;font-weight:700}
+.day .dl small{display:block;font-family:var(--sans);font-size:11.5px;color:var(--muted);font-weight:400}
+.day .its{display:flex;gap:8px;flex-wrap:wrap}
+.day .its .s{width:62px;border-radius:7px;overflow:hidden;border:1px solid var(--line)}
+.tripcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.tripcard{border:1px solid var(--line);border-radius:10px;padding:16px;cursor:pointer;background:#fff}
+.tripcard:hover{box-shadow:0 4px 18px rgba(15,15,15,.08)}
+.tripcard .mini-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;margin-bottom:12px}
+.tripcard .mini-grid .th{border-radius:4px;aspect-ratio:1/1}
+.tripcard .mini-grid .bl{background:var(--paper);border:1px dashed var(--line2);border-radius:4px;aspect-ratio:1/1}
+/* ---------- Board ---------- */
+.board{display:grid;grid-template-columns:repeat(3,minmax(220px,1fr));gap:14px;overflow-x:auto}
+.col{background:var(--paper);border-radius:10px;padding:10px;min-height:200px}
+.col-h{display:flex;align-items:center;gap:8px;padding:4px 4px 10px;font-weight:500;font-size:13.5px}
+.tcard{background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:8px;display:grid;grid-template-columns:44px 1fr;gap:10px;cursor:pointer}
+.tcard:hover{box-shadow:0 3px 12px rgba(15,15,15,.07)}
+.tcard .th{border-radius:6px}
+.tcard .tt{font-size:13px;line-height:1.4;margin:2px 0 6px;color:var(--ink)}
+.tcard .mv{display:flex;gap:4px;margin-top:6px}
+/* ---------- Toast ---------- */
+#toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:9px 16px;border-radius:8px;font-size:13.5px;opacity:0;pointer-events:none;transition:.2s;z-index:60}
+#toast.show{opacity:1;transform:translateX(-50%)}
+/* ---------- Responsive ---------- */
+@media (max-width:900px){
+  .sudoku-wrap{grid-template-columns:1fr}
+  .page{padding:20px 22px 80px}
+}
+@media (max-width:760px){
+  html,body{font-size:15px}
+  #side{position:fixed;left:-290px;top:0;bottom:0;width:280px;z-index:50;transition:left .22s;padding-top:calc(10px + env(safe-area-inset-top));padding-bottom:calc(16px + env(safe-area-inset-bottom))}
+  body.menu #side{left:0;box-shadow:10px 0 40px rgba(0,0,0,.15)}
+  body.menu .drawer-shade{display:block}
+  .btn.menubtn{display:inline-flex;padding:6px 9px}
+  .nav{min-height:42px;font-size:15px}
+  .nav .more{display:grid}
+  .topbar{padding:calc(8px + env(safe-area-inset-top)) 12px 8px;gap:8px}
+  .crumb .hide-m{display:none}
+  .topbar .btn.primary .lbl{display:none}
+  .topbar .btn.primary{padding:7px 13px;font-size:17px}
+  .env{cursor:pointer}
+  .env .caret{display:inline}
+  .page{padding:12px 16px calc(100px + env(safe-area-inset-bottom))}
+  .page-icon{font-size:40px;margin:4px 0}
+  h1.title{font-size:34px}
+  .lede{font-size:14px;margin-bottom:16px}
+  .stats{flex-wrap:nowrap;overflow-x:auto;margin:0 -16px 16px;padding:0 16px;scrollbar-width:none}
+  .stat{min-width:118px;flex:none}
+  .toolbar{flex-wrap:nowrap;overflow-x:auto;margin:0 -16px 14px;padding:0 16px 8px;scrollbar-width:none}
+  .toolbar .spacer{display:none}
+  .search{min-width:150px}
+  .gallery{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .card:hover{transform:none}
+  .card .body{padding:9px 10px 11px}
+  input,select,textarea{font-size:16px !important}
+  .panel{width:100%;animation:up .22s ease-out}
+  .panel-top{padding-top:calc(10px + env(safe-area-inset-top))}
+  .panel-body{padding:16px 18px calc(60px + env(safe-area-inset-bottom))}
+  .props{grid-template-columns:110px 1fr}
+  .big-title{font-size:30px}
+  .modal{left:0;right:0;top:auto;bottom:0;transform:none;width:100%;max-height:92vh;max-height:92dvh;border-radius:16px 16px 0 0;animation:up .22s ease-out;padding-bottom:env(safe-area-inset-bottom)}
+  .modal.sm{width:100%}
+  .modal-h h2{font-size:24px}
+  .picker{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .row2{grid-template-columns:1fr}
+  .board{grid-template-columns:repeat(3,82vw);scroll-snap-type:x mandatory;margin:0 -16px;padding:0 16px}
+  .col{scroll-snap-align:start}
+  .sudoku{gap:5px}
+  .sudoku[style]{grid-template-columns:58px repeat(var(--cols),minmax(0,1fr)) !important}
+  .sudoku .rh input{font-size:14px !important;padding:2px}
+  .rowcheck{font-size:10px;padding-left:2px}
+  .sudoku .h{font-size:10px}
+  .sudoku .h input{font-size:10.5px !important;padding:3px 2px}
+  .cell .cn{font-size:10px;padding:3px 4px}
+  .cell{border-radius:7px}
+  .day{grid-template-columns:62px 1fr}
+  .day .btn{grid-column:2;justify-self:start}
+  .day .its .s{width:50px}
+  #tabs{display:flex}
+  #toast{bottom:calc(86px + env(safe-area-inset-bottom))}
+}
+@keyframes up{from{transform:translateY(30px);opacity:.4}to{transform:none;opacity:1}}
+.env .caret{display:none;font-size:9px;margin-left:2px}
+#tabs{display:none;position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(255,255,255,.94);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+#tabs button{flex:1;border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;color:var(--muted);padding:4px 0;position:relative;cursor:pointer}
+#tabs button .ti{line-height:0;opacity:.75}
+#tabs button.on{color:var(--ink);font-weight:600}
+#tabs button.on .ti{opacity:1;color:var(--orange)}
+#tabs .tb{position:absolute;top:0;right:calc(50% - 22px);background:var(--burg);color:#fff;font-size:9.5px;border-radius:8px;padding:0 5px;line-height:15px}
+.drawer-shade{display:none;position:fixed;inset:0;background:rgba(15,15,15,.2);z-index:49}
+@media (max-width:760px){#tabs{display:flex}input.big-title{font-size:30px !important}#tname{font-size:32px !important}.sudoku[style]{grid-template-columns:66px repeat(var(--cols),minmax(0,1fr)) !important}.sudoku .rh input{font-size:12.5px !important;font-family:var(--sans);font-weight:600}.rowcheck .rc-t{display:none}.pv:has(#ts){flex-wrap:wrap !important}.tab{white-space:nowrap;flex:none}.fsel{flex:none}}
+</style>
+</head>
+<body>
+<div id="app"><aside id="side"></aside><main id="main"></main></div>
+<div id="peek"></div>
+<div id="modal"></div>
+<div id="toast"></div>
+<nav id="tabs"></nav>
+<div class="drawer-shade" data-act="menu"></div>
+
+<script>
+/* =========================================================
+   Raestyle prototype. All data lives in this browser.
+   ========================================================= */
+const LS_KEY = 'stylehub.v1';
+
+const BRAND = {orange:'#F37021', green:'#154734', burgundy:'#660009', tiffany:'#81D8D0', ink:'#37352F'};
+const COLORS = {
+  Black:'#1F1F1F', White:'#FFFFFF', Ivory:'#FBF8EF', Cream:'#F1E8D3', Beige:'#D9C7A7', Camel:'#C19A6B',
+  Brown:'#6B4426', Grey:'#A3A3A0', Charcoal:'#3F3F44', Navy:'#1E2A4A', Blue:'#3D6FB6', 'Light blue':'#A9C8E8',
+  Tiffany:'#81D8D0', Green:'#154734', Olive:'#6B7041', Burgundy:'#660009', Red:'#C4161C', Pink:'#F2B8C6',
+  Orange:'#F37021', Yellow:'#F2C94C', Purple:'#6E4C8F', Gold:'#C9A227', Silver:'#C7C7C7'
+};
+const CATS = ['Shirt','Tee','Blouse','Top','Jumper','Cardigan','Trousers','Jeans','Skirt','Shorts','Dress','Jumpsuit','Blazer','Jacket','Coat','Shoes','Trainers','Boots','Sandals','Bag','Accessory','Jewellery','Swimwear','Activewear','Loungewear'];
+const SEASONS = ['Spring','Summer','Autumn','Winter','All year'];
+const OCCASIONS = ['Casual','Work','Smart','Evening','Formal','Sport','Travel'];
+const TASK_STATUS = ['To do','In progress','Done'];
+const TASK_WHERE = ['At home','Tailor','Cobbler','Dry cleaner','Jeweller'];
+const PRIORITY = ['High','Medium','Low'];
+const EMOJIS = ['🇮🇪','🇧🇷','🇵🇹','🇫🇷','🇮🇹','🇪🇸','🇬🇧','🇺🇸','🏠','🏖️','🏔️','🧳','✈️','🏛️','🌿','🌸'];
+const COLMAP = {
+  tops:['Shirt','Tee','Blouse','Top','Jumper','Cardigan','Swimwear','Activewear','Loungewear'],
+  bottoms:['Trousers','Jeans','Skirt','Shorts'],
+  layers:['Blazer','Jacket','Coat','Cardigan','Jumper'],
+  shoes:['Shoes','Trainers','Boots','Sandals'],
+  accessories:['Bag','Accessory','Jewellery'],
+  dresses:['Dress','Jumpsuit'],
+};
+function colCats(label){
+  const k=(label||'').toLowerCase().trim();
+  for(const key in COLMAP){ if(k.startsWith(key.slice(0,4))) return COLMAP[key]; }
+  if(k.startsWith('bag')||k.startsWith('jewel')) return COLMAP.accessories;
+  if(k.startsWith('outer')||k.startsWith('coat')||k.startsWith('jack')) return COLMAP.layers;
+  return null;
+}
+
+
+/* ---------- Icons (line set, 24px grid) ---------- */
+const ICONS={
+  shirt:'<path d="M20.4 3.5 16 2a4 4 0 0 1-8 0L3.6 3.5a2 2 0 0 0-1.3 2.2l.6 3.5a1 1 0 0 0 1 .8H6v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V10h2.1a1 1 0 0 0 1-.8l.6-3.5a2 2 0 0 0-1.3-2.2z"/>',
+  sparkles:'<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 15v4M17 17h4M5 3v3M3.5 4.5h3"/>',
+  layers:'<path d="m12 2 10 5-10 5L2 7z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/>',
+  luggage:'<rect x="6" y="6" width="12" height="14" rx="2"/><path d="M9 6V3h6v3M10 10v6M14 10v6M8 20v1.5M16 20v1.5"/>',
+  scissors:'<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12"/>',
+  sliders:'<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>',
+  globe:'<circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  menu:'<path d="M4 6h16M4 12h16M4 18h16"/>',
+  more:'<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>',
+  camera:'<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/>',
+  clipboard:'<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2M9 12h6M9 16h4"/>',
+  x:'<path d="M18 6 6 18M6 6l12 12"/>',
+  heart:'<path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7z"/>',
+  bulb:'<path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2z"/>',
+  alert:'<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/>',
+  alertc:'<circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/>',
+  bag:'<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/>',
+  calendar:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+  hash:'<path d="M4 9h16M4 15h16M10 3 8 21M16 3l-2 18"/>',
+  grid:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/>',
+  wardrobe:'<rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 2v20M9.5 11v2M14.5 11v2"/>',
+  check:'<path d="M20 6 9 17l-5-5"/>',
+  checkc:'<circle cx="12" cy="12" r="10"/><path d="m8 12 3 3 5-6"/>',
+  circle:'<circle cx="12" cy="12" r="10"/>',
+  clock:'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+  refresh:'<path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5"/>',
+  shuffle:'<path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/>',
+  link:'<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>',
+  external:'<path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
+  euro:'<path d="M4 10h12M4 14h9M19 6a7.7 7.7 0 0 0-5.2-2A7.9 7.9 0 0 0 6 12c0 4.4 3.5 8 7.8 8 2 0 3.8-.8 5.2-2"/>',
+  tag:'<path d="M12.6 2.6A2 2 0 0 0 11.2 2H4a2 2 0 0 0-2 2v7.2a2 2 0 0 0 .6 1.4l8.7 8.7a2.4 2.4 0 0 0 3.4 0l6.6-6.6a2.4 2.4 0 0 0 0-3.4z"/><circle cx="7.5" cy="7.5" r="1"/>',
+  waves:'<path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5s2.4 2 5 2 2.5-2 5-2c1.3 0 1.9.5 2.5 1M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2s2.4 2 5 2 2.5-2 5-2c1.3 0 1.9.5 2.5 1M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2s2.4 2 5 2 2.5-2 5-2c1.3 0 1.9.5 2.5 1"/>',
+  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  palette:'<circle cx="13.5" cy="6.5" r="1"/><circle cx="17.5" cy="10.5" r="1"/><circle cx="8.5" cy="7.5" r="1"/><circle cx="6.5" cy="12.5" r="1"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.6-.7 1.6-1.7 0-.4-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1a1.6 1.6 0 0 1 1.6-1.7h2c3 0 5.6-2.5 5.6-5.6C22 6 17.5 2 12 2z"/>',
+  list:'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
+  flag:'<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7"/>',
+  star:'<path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/>',
+  gallery:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
+  table:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 9v12"/>',
+  chevl:'<path d="m15 18-6-6 6-6"/>',
+  chevd:'<path d="m6 9 6 6 6-6"/>',
+  arrow:'<path d="M5 12h14M12 5l7 7-7 7"/>',
+  upload:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>',
+  download:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>',
+  copy:'<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
+  trash:'<path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+  square:'<rect x="4" y="4" width="16" height="16" rx="3"/>',
+};
+function ic(name,size=16,cls=''){ return `<svg class="i ${cls}" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name]||''}</svg>`; }
+function pageIcon(name,color){ return `<div class="page-icon"><span class="pgi" style="color:${color}">${ic(name,30)}</span></div>`; }
+
+/* ---------- Silhouettes ---------- */
+const PATHS = {
+  top:'M30 18 L42 14 Q50 23 58 14 L70 18 L87 34 L77 45 L70 39 L70 86 L30 86 L30 39 L23 45 L13 34 Z',
+  knit:'M33 16 L43 13 Q50 20 57 13 L67 16 L83 30 L88 78 L78 80 L71 42 L71 86 L29 86 L29 42 L22 80 L12 78 L17 30 Z',
+  pants:'M32 12 L68 12 L72 88 L56 88 L50 38 L44 88 L28 88 Z',
+  shorts:'M29 24 L71 24 L76 66 L55 66 L50 42 L45 66 L24 66 Z',
+  skirt:'M36 18 L64 18 L79 80 Q50 86 21 80 Z',
+  dress:'M40 10 L44 10 Q50 18 56 10 L60 10 L62 30 L56 41 L79 88 Q50 92 21 88 L44 41 L38 30 Z',
+  coat:'M34 12 L44 10 L50 24 L56 10 L66 12 L84 28 L87 82 L77 84 L72 44 L72 90 L28 90 L28 44 L23 84 L13 82 L16 28 Z',
+  shoe:'M12 64 L18 42 L32 42 Q40 54 58 56 L82 61 Q90 64 88 73 L12 73 Z',
+  boot:'M30 12 L52 12 L52 54 L78 61 Q87 65 85 76 L30 76 Z',
+  bag:'M20 40 L80 40 L85 86 L15 86 Z',
+  acc:'M18 32 Q50 18 82 32 L74 48 Q50 38 26 48 Z M56 44 L68 82 L57 84 L49 48 Z',
+  swim:'M27 28 L46 28 L38 46 Z M54 28 L73 28 L62 46 Z M29 60 L71 60 L56 78 L44 78 Z',
+};
+function shapeOf(cat){
+  if(['Jumper','Cardigan','Activewear','Loungewear'].includes(cat)) return 'knit';
+  if(['Trousers','Jeans'].includes(cat)) return 'pants';
+  if(cat==='Shorts') return 'shorts';
+  if(cat==='Skirt') return 'skirt';
+  if(['Dress','Jumpsuit'].includes(cat)) return 'dress';
+  if(['Blazer','Jacket','Coat'].includes(cat)) return 'coat';
+  if(['Shoes','Trainers','Sandals'].includes(cat)) return 'shoe';
+  if(cat==='Boots') return 'boot';
+  if(cat==='Bag') return 'bag';
+  if(['Accessory','Jewellery'].includes(cat)) return 'acc';
+  if(cat==='Swimwear') return 'swim';
+  return 'top';
+}
+let gidN=0;
+function thumb(it, cls=''){
+  if(!it) return `<div class="th ${cls}"></div>`;
+  if(it.image) return `<div class="th ${cls}"><img src="${it.image}" alt=""></div>`;
+  const cs=(it.colors||[]).map(c=>COLORS[c]||'#ccc'); if(!cs.length) cs.push('#DAD8D2');
+  const gid='g'+(++gidN);
+  let grad;
+  if(cs.length===1) grad=`<linearGradient id="${gid}"><stop offset="0" stop-color="${cs[0]}"/></linearGradient>`;
+  else {
+    const n=cs.length, stops=cs.map((c,i)=>`<stop offset="${i/n}" stop-color="${c}"/><stop offset="${(i+1)/n}" stop-color="${c}"/>`).join('');
+    grad=`<linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="${0.09*n}" spreadMethod="repeat">${stops}</linearGradient>`;
+  }
+  const sh=shapeOf(it.category);
+  const handle = sh==='bag' ? `<path d="M35 40 Q35 18 50 18 Q65 18 65 40" fill="none" stroke="${cs[0]==='#FFFFFF'?'#cfcdc7':cs[0]}" stroke-width="4" stroke-linecap="round"/>` : '';
+  return `<div class="th ${cls}"><svg viewBox="0 0 100 100" aria-hidden="true"><defs>${grad}</defs>${handle}<path d="${PATHS[sh]}" fill="url(#${gid})" stroke="rgba(55,53,47,.28)" stroke-width="1.2" stroke-linejoin="round"/></svg></div>`;
+}
+
+/* ---------- State ---------- */
+let S;
+const UI = {view:'closet', q:'', fCat:'', fColor:'', fSeason:'', fStatus:'', layout:'gallery', peek:null, modal:null, tripId:null, pickTab:'All', pickAll:false};
+/* Storage: IndexedDB (room for photos), localStorage as fallback */
+let _db=null;
+function idb(){ if(_db) return _db; _db=new Promise((res,rej)=>{ try{ const r=indexedDB.open('raestyle',1); r.onupgradeneeded=()=>r.result.createObjectStore('kv'); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }catch(e){ rej(e); } }); return _db; }
+async function idbGet(k){ const db=await idb(); return new Promise((res,rej)=>{ const q=db.transaction('kv').objectStore('kv').get(k); q.onsuccess=()=>res(q.result); q.onerror=()=>rej(q.error); }); }
+async function idbSet(k,v){ const db=await idb(); return new Promise((res,rej)=>{ const tx=db.transaction('kv','readwrite'); tx.objectStore('kv').put(v,k); tx.oncomplete=()=>res(); tx.onerror=()=>rej(tx.error); }); }
+async function load(){
+  try{ const v=await idbGet(LS_KEY); if(v) return JSON.parse(v); }catch(e){}
+  try{ const r=localStorage.getItem(LS_KEY); return r?JSON.parse(r):null; }catch(e){ return null; }
+}
+let saveWarned=false, saveT=null;
+function save(){ clearTimeout(saveT); saveT=setTimeout(flush,250); }
+async function flush(){
+  const json=JSON.stringify(S);
+  try{ await idbSet(LS_KEY,json); return; }catch(e){}
+  try{ localStorage.setItem(LS_KEY,json); }catch(e){ if(!saveWarned){ toast('Couldn’t save. Storage is full or blocked.'); saveWarned=true; } }
+}
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden'&&saveT){ clearTimeout(saveT); flush(); } });
+const uid=()=>Math.random().toString(36).slice(2,10);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const W=id=>S.wardrobes.find(w=>w.id===id);
+const I=id=>S.items.find(x=>x.id===id);
+const accentOf=w=>BRAND[w?.accent]||BRAND.ink;
+const scoped=arr=>S.current==='all'?arr:arr.filter(x=>x.wardrobeId===S.current);
+const openTasks=()=>S.items.filter(i=>i.taskText && i.taskStatus!=='Done');
+const money=n=>'€'+Number(n||0).toLocaleString('en-IE',{maximumFractionDigits:0});
+
+function blankItem(wid){ return {id:uid(),wardrobeId:wid,name:'',category:'Top',colors:[],seasons:[],brand:'',material:'',occasions:[],price:'',purchased:'',fav:false,image:'',notes:'',taskText:'',taskStatus:'',taskWhere:'',taskDue:'',created:Date.now()}; }
+
+function seed(){
+  const D='w_dub', R='w_rio';
+  const it=(id,w,name,category,colors,seasons,brand,extra={})=>Object.assign(blankItem(w),{id,name,category,colors,seasons,brand},extra);
+  return {
+    current:D,
+    wardrobes:[
+      {id:D,name:'Dublin',icon:'🇮🇪',city:'Dublin, Ireland',accent:'green',notes:'Main wardrobe: layers, wool and rainproof pieces.'},
+      {id:R,name:'Rio',icon:'🇧🇷',city:'Rio de Janeiro, Brazil',accent:'tiffany',notes:'Kept at the family home. Summer all year.'},
+    ],
+    items:[
+      it('i1',D,'White Oxford shirt','Shirt',['White'],['All year'],'Uniqlo',{material:'Cotton',occasions:['Work','Casual'],price:40}),
+      it('i2',D,'Breton striped top','Top',['Navy','White'],['Spring','Autumn'],'Saint James',{material:'Cotton',occasions:['Casual'],price:95,fav:true}),
+      it('i3',D,'Camel cashmere jumper','Jumper',['Camel'],['Autumn','Winter'],'& Other Stories',{material:'Cashmere',occasions:['Work','Casual'],price:140,fav:true}),
+      it('i4',D,'Cream cable knit jumper','Jumper',['Cream'],['Winter'],'Arket',{material:'Wool',occasions:['Casual'],price:99,taskText:'Small hole on the left cuff, darn before winter',taskStatus:'To do',taskWhere:'At home'}),
+      it('i5',D,'Black silk blouse','Blouse',['Black'],['All year'],'Massimo Dutti',{material:'Silk',occasions:['Work','Evening'],price:89}),
+      it('i6',D,'Navy tailored trousers','Trousers',['Navy'],['All year'],'COS',{material:'Wool blend',occasions:['Work','Smart'],price:115,taskText:'Take up the hem 2cm',taskStatus:'In progress',taskWhere:'Tailor'}),
+      it('i7',D,'Straight leg jeans','Jeans',['Blue'],['All year'],"Levi's",{material:'Denim',occasions:['Casual'],price:110,fav:true}),
+      it('i8',D,'Camel midi skirt','Skirt',['Camel'],['Autumn','Winter'],'Zara',{occasions:['Work','Smart'],price:46}),
+      it('i9',D,'Black wide leg trousers','Trousers',['Black'],['All year'],'Massimo Dutti',{occasions:['Work','Evening'],price:79}),
+      it('i10',D,'Burgundy wrap dress','Dress',['Burgundy'],['Autumn','Winter'],'Reformation',{occasions:['Evening','Smart'],price:220,fav:true}),
+      it('i11',D,'Camel wool coat','Coat',['Camel'],['Winter'],'Max Mara',{material:'Wool',occasions:['Work','Smart'],price:690}),
+      it('i12',D,'Navy blazer','Blazer',['Navy'],['All year'],'Zara',{occasions:['Work','Smart'],price:69}),
+      it('i13',D,'Beige trench coat','Coat',['Beige'],['Spring','Autumn'],'Mango',{occasions:['Work','Casual','Travel'],price:120}),
+      it('i14',D,'Black leather loafers','Shoes',['Black'],['All year'],'G.H. Bass',{material:'Leather',occasions:['Work','Smart'],price:150,taskText:'Resole and polish',taskStatus:'To do',taskWhere:'Cobbler'}),
+      it('i15',D,'White trainers','Trainers',['White'],['All year'],'Veja',{occasions:['Casual','Travel'],price:130}),
+      it('i16',D,'Brown ankle boots','Boots',['Brown'],['Autumn','Winter'],'Clarks',{material:'Suede',price:140}),
+      it('i17',D,'Orange silk scarf','Accessory',['Orange','Gold'],['All year'],'Vintage',{material:'Silk',occasions:['Smart','Evening'],price:60,fav:true}),
+      it('i18',D,'Tan leather tote','Bag',['Camel'],['All year'],'Longchamp',{material:'Leather',occasions:['Work','Travel'],price:180}),
+      it('i19',D,'Green velvet blazer','Blazer',['Green'],['Autumn','Winter'],'Sézane',{occasions:['Evening','Smart'],price:210,taskText:'Replace missing button',taskStatus:'Done',taskWhere:'At home'}),
+      it('r1',R,'White linen shirt','Shirt',['White'],['Summer'],'Zara',{material:'Linen',occasions:['Casual'],price:40}),
+      it('r2',R,'Beige linen trousers','Trousers',['Beige'],['Summer'],'Arezzo',{material:'Linen',price:180}),
+      it('r3',R,'Denim shorts','Shorts',['Blue'],['Summer'],'Farm Rio',{price:120}),
+      it('r4',R,'Floral sundress','Dress',['Green','White'],['Summer'],'Farm Rio',{occasions:['Casual','Evening'],price:350,fav:true}),
+      it('r5',R,'Orange bikini','Swimwear',['Orange'],['Summer'],'Haight',{price:280}),
+      it('r6',R,'Leather sandals','Sandals',['Brown'],['Summer'],'Arezzo',{price:220}),
+      it('r7',R,'Straw beach bag','Bag',['Beige'],['Summer'],'Market find',{price:60}),
+      it('r8',R,'Tiffany blue slip dress','Dress',['Tiffany'],['Summer'],'Animale',{occasions:['Evening'],price:400}),
+      it('r9',R,'Ivory silk cami','Top',['Ivory'],['Summer'],'Animale',{material:'Silk',price:190}),
+    ],
+    wishlist:[
+      {id:'x1',name:'Silk carré scarf',brand:'Hermès',url:'https://www.hermes.com',price:520,priority:'High',category:'Accessory',colors:['Orange','Gold'],seasons:['All year'],notes:'Classic print. Check preloved too.',image:'',created:Date.now()},
+      {id:'x2',name:'Horsebit loafers',brand:'Gucci',url:'https://www.gucci.com',price:890,priority:'Medium',category:'Shoes',colors:['Black'],seasons:['All year'],notes:'Would replace the worn Bass loafers.',image:'',created:Date.now()},
+      {id:'x3',name:'Linen blazer',brand:'COS',url:'https://www.cos.com',price:175,priority:'Medium',category:'Blazer',colors:['Beige'],seasons:['Spring','Summer'],notes:'',image:'',created:Date.now()},
+      {id:'x4',name:'Burgundy leather belt',brand:'',url:'',price:70,priority:'Low',category:'Accessory',colors:['Burgundy'],seasons:['All year'],notes:'',image:'',created:Date.now()},
+    ],
+    outfits:[
+      {id:'o1',wardrobeId:D,name:'Office Monday',itemIds:['i1','i6','i12','i14','i18'],occasions:['Work'],seasons:['All year'],notes:''},
+      {id:'o2',wardrobeId:D,name:'Sunday brunch',itemIds:['i2','i7','i13','i15'],occasions:['Casual'],seasons:['Spring','Autumn'],notes:''},
+      {id:'o3',wardrobeId:D,name:'Dinner in town',itemIds:['i10','i11','i16','i17'],occasions:['Evening'],seasons:['Winter'],notes:'Add gold earrings.'},
+      {id:'o4',wardrobeId:R,name:'Beach day',itemIds:['r5','r3','r6','r7'],occasions:['Casual'],seasons:['Summer'],notes:''},
+    ],
+    trips:[
+      {id:'t1',name:'Lisbon long weekend',wardrobeId:D,start:'',end:'',days:4,rows:4,cols:4,
+       colLabels:['Tops','Bottoms','Layers','Shoes'],rowLabels:['Navy','Camel','Black','White'],
+       grid:{'0-0':'i2','0-1':'i6','0-2':'i12','0-3':'i14','1-0':'i3','1-1':'i8','1-2':'i13','1-3':'i16','2-0':'i5','2-1':'i9','3-0':'i1','3-1':'i7','3-3':'i15'},plan:[]},
+    ],
+  };
+}
+
+/* ---------- Render ---------- */
+function render(){
+  const ae=document.activeElement, fid=ae&&ae.id; let s0=null,s1=null;
+  try{ s0=ae.selectionStart; s1=ae.selectionEnd; }catch(e){}
+  const keep={}; document.querySelectorAll('[data-keep]').forEach(el=>keep[el.dataset.keep]=el.scrollTop);
+  gidN=0;
+  document.getElementById('side').innerHTML=renderSide();
+  document.getElementById('main').innerHTML=renderTop()+`<div class="page">${renderPage()}</div>`;
+  document.getElementById('peek').innerHTML=renderPeek();
+  document.getElementById('modal').innerHTML=renderModal();
+  document.getElementById('tabs').innerHTML=renderTabs();
+  document.querySelectorAll('[data-keep]').forEach(el=>{ if(keep[el.dataset.keep]!=null) el.scrollTop=keep[el.dataset.keep]; });
+  if(fid){ const el=document.getElementById(fid); if(el){ el.focus({preventScroll:true}); try{ if(s0!=null) el.setSelectionRange(s0,s1); }catch(e){} } }
+}
+
+function renderSide(){
+  const views=[['closet','shirt','Closet'],['wishlist','sparkles','Wishlist'],['outfits','layers','Outfits'],['travel','luggage','Travel sudoku'],['repairs','scissors','Repairs'],['data','sliders','Data & settings']];
+  const nOpen=openTasks().filter(i=>S.current==='all'||i.wardrobeId===S.current).length;
+  return `
+  <div class="brand"><div class="logo"><span>R</span></div><div><div class="brand-name">Raestyle</div><div class="brand-sub">Wardrobe manager</div></div></div>
+  <div class="sec">Wardrobes<span class="add" data-act="newWardrobe" title="New wardrobe">+</span></div>
+  <div class="nav ${S.current==='all'?'on':''}" data-act="wardrobe" data-id="all"><span class="ic">${ic('globe',17)}</span>All wardrobes<span class="ct">${S.items.length}</span></div>
+  ${S.wardrobes.map(w=>`<div class="nav ${S.current===w.id?'on':''}" data-act="wardrobe" data-id="${w.id}">
+     <span class="ic">${esc(w.icon)}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(w.name)}</span>
+     <span class="ct">${S.items.filter(i=>i.wardrobeId===w.id).length}</span>
+     <span class="more" data-act="editWardrobe" data-id="${w.id}" title="Edit wardrobe">${ic('more',15)}</span></div>`).join('')}
+  <div class="nav" data-act="newWardrobe" style="color:var(--muted)"><span class="ic">${ic('plus',17)}</span>New wardrobe</div>
+  <div class="sec">Workspace</div>
+  ${views.map(([v,icn,l])=>`<div class="nav ${UI.view===v?'on':''}" data-act="nav" data-v="${v}"><span class="ic">${ic(icn,17)}</span>${l}${v==='repairs'&&nOpen?`<span class="badge">${nOpen}</span>`:''}${v==='wishlist'?`<span class="ct">${S.wishlist.length}</span>`:''}</div>`).join('')}
+  <div class="side-foot"><div class="palette-strip"><i style="background:#fff"></i><i style="background:var(--orange)"></i><i style="background:var(--green)"></i><i style="background:var(--burg)"></i><i style="background:var(--tiff)"></i></div>Data saved on this device.</div>`;
+}
+
+function renderTabs(){
+  const n=openTasks().filter(i=>S.current==='all'||i.wardrobeId===S.current).length;
+  return [['closet','shirt','Closet'],['outfits','layers','Outfits'],['travel','luggage','Travel'],['wishlist','sparkles','Wishlist'],['repairs','scissors','Repairs']]
+    .map(([v,icn,l])=>`<button class="${UI.view===v?'on':''}" data-act="nav" data-v="${v}"><span class="ti">${ic(icn,22)}</span>${l}${v==='repairs'&&n?`<span class="tb">${n}</span>`:''}</button>`).join('');
+}
+function renderTop(){
+  const w=W(S.current);
+  const label={closet:'Closet',wishlist:'Wishlist',outfits:'Outfits',travel:'Travel sudoku',repairs:'Repairs',data:'Data & settings'}[UI.view];
+  const envPill = `<span class="env" style="--c:${w?accentOf(w):BRAND.ink}">${w?esc(w.icon)+' '+esc(w.name):'All wardrobes'}<span class="caret">${ic('chevd',12)}</span></span>`;
+  let action='';
+  if(UI.view==='closet') action=`<button class="btn primary" data-act="newItem">${ic('plus',16)}<span class="lbl">New item</span></button>`;
+  if(UI.view==='wishlist') action=`<button class="btn primary" data-act="newWish">${ic('plus',16)}<span class="lbl">Save an item</span></button>`;
+  if(UI.view==='outfits') action=`<button class="btn primary" data-act="newOutfit">${ic('plus',16)}<span class="lbl">New outfit</span></button>`;
+  if(UI.view==='travel'&&!UI.tripId) action=`<button class="btn primary" data-act="newTrip">${ic('plus',16)}<span class="lbl">New trip</span></button>`;
+  const trip=UI.view==='travel'&&UI.tripId?S.trips.find(t=>t.id===UI.tripId):null;
+  return `<div class="topbar"><button class="btn ghost menubtn" data-act="menu">${ic('menu',18)}</button>
+    <div class="crumb"><span class="hide-m">${w?esc(w.icon)+' '+esc(w.name):ic('globe',14)+' All'} /</span> ${trip?`<span data-act="backTrips" style="cursor:pointer;display:inline-flex;align-items:center;gap:2px">${ic('chevl',16)}${label}</span> <span class="hide-m">/</span> <b class="hide-m">${esc(trip.name||'Untitled trip')}</b>`:`<b class="hide-m">${label}</b>`}</div>
+    <span data-act="menu" style="display:inline-flex">${envPill}</span><div class="spacer"></div>${action}</div>`;
+}
+
+function renderPage(){
+  switch(UI.view){
+    case 'closet': return pageCloset();
+    case 'wishlist': return pageWishlist();
+    case 'outfits': return pageOutfits();
+    case 'travel': return UI.tripId?pageTrip():pageTrips();
+    case 'repairs': return pageRepairs();
+    case 'data': return pageData();
+  }
+  return '';
+}
+
+/* ---------- Closet ---------- */
+function filteredItems(){
+  const q=UI.q.toLowerCase().trim();
+  return scoped(S.items).filter(i=>{
+    if(UI.fCat && i.category!==UI.fCat) return false;
+    if(UI.fColor && !(i.colors||[]).includes(UI.fColor)) return false;
+    if(UI.fSeason && !(i.seasons||[]).includes(UI.fSeason)) return false;
+    if(UI.fStatus==='task' && !(i.taskText&&i.taskStatus!=='Done')) return false;
+    if(UI.fStatus==='fav' && !i.fav) return false;
+    if(q && !(`${i.name} ${i.brand} ${i.category} ${(i.colors||[]).join(' ')} ${i.material}`.toLowerCase().includes(q))) return false;
+    return true;
+  }).sort((a,b)=>CATS.indexOf(a.category)-CATS.indexOf(b.category)||a.name.localeCompare(b.name));
+}
+function pageCloset(){
+  const w=W(S.current); const all=scoped(S.items); const list=filteredItems();
+  const value=all.reduce((a,i)=>a+(Number(i.price)||0),0);
+  const brands=new Set(all.map(i=>i.brand).filter(Boolean)).size;
+  const sel=(ui,opts,ph)=>`<select class="fsel ${UI[ui]?'set':''}" data-ui="${ui}" id="f_${ui}"><option value="">${ph}</option>${opts.map(o=>Array.isArray(o)?`<option value="${o[0]}" ${UI[ui]===o[0]?'selected':''}>${o[1]}</option>`:`<option ${UI[ui]===o?'selected':''}>${esc(o)}</option>`).join('')}</select>`;
+  const anyF=UI.q||UI.fCat||UI.fColor||UI.fSeason||UI.fStatus;
+  return `
+    ${w?`<div class="page-icon">${esc(w.icon)}</div>`:pageIcon('globe','var(--green)')}
+    <h1 class="title">${w?esc(w.name)+' closet':'Everything I own'}</h1>
+    <p class="lede">${w?esc(w.notes||w.city||''):'Every item across all of your wardrobes. Switch wardrobes in the sidebar to see just one location.'}</p>
+    <div class="stats">
+      <div class="stat"><div class="n">${all.length}</div><div class="l">Items</div></div>
+      <div class="stat"><div class="n">${brands}</div><div class="l">Brands</div></div>
+      <div class="stat"><div class="n">${money(value)}</div><div class="l">Wardrobe value</div></div>
+      <div class="stat"><div class="n" style="color:var(--burg)">${all.filter(i=>i.taskText&&i.taskStatus!=='Done').length}</div><div class="l">Need attention</div></div>
+    </div>
+    <div class="toolbar">
+      <button class="tab ${UI.layout==='gallery'?'on':''}" data-act="layout" data-v="gallery">${ic('gallery',15)} Gallery</button>
+      <button class="tab ${UI.layout==='table'?'on':''}" data-act="layout" data-v="table">${ic('table',15)} Table</button>
+      <div class="spacer"></div>
+      ${sel('fCat',CATS,'Category')}${sel('fColor',Object.keys(COLORS),'Colour')}${sel('fSeason',SEASONS,'Season')}${sel('fStatus',[['task','Needs a fix'],['fav','Favourites']],'Status')}
+      ${anyF?`<button class="btn ghost sm" data-act="clearFilters">Clear</button>`:''}
+      <input class="search" id="q" data-ui="q" placeholder="Search…" value="${esc(UI.q)}">
+    </div>
+    ${!list.length?`<div class="empty"><div class="big">${ic('shirt',34)}</div>${all.length?'Nothing matches those filters.':'This wardrobe is empty.'}<div style="margin-top:12px"><button class="btn primary" data-act="newItem">${ic('plus',15)} Add an item</button></div></div>`
+     : UI.layout==='gallery'?`<div class="gallery">${list.map(itemCard).join('')}</div>`:itemTable(list)}`;
+}
+function colorDots(cs){ return `<span class="dots">${(cs||[]).map(c=>`<span class="dot" title="${esc(c)}" style="background:${COLORS[c]||'#ccc'}"></span>`).join('')}</span>`; }
+function itemCard(i){
+  const task=i.taskText&&i.taskStatus!=='Done';
+  return `<div class="card" data-act="openItem" data-id="${i.id}">
+    ${thumb(i)}
+    <div class="flag">${i.fav?`<span class="pill w" style="color:var(--orange)">${ic('heart',12,'fill')}</span>`:''}${task?`<span class="pill w" style="color:var(--burg)">${ic('scissors',12)} Fix</span>`:''}</div>
+    <div class="body"><div class="nm">${esc(i.name||'Untitled')}</div><div class="br">${esc(i.brand||'No brand')}${S.current==='all'?` · ${esc(W(i.wardrobeId)?.icon||'')} ${esc(W(i.wardrobeId)?.name||'')}`:''}</div>
+    <div class="pills"><span class="pill">${esc(i.category)}</span>${colorDots(i.colors)}${(i.seasons||[]).slice(0,2).map(s=>`<span class="pill t">${esc(s)}</span>`).join('')}</div></div></div>`;
+}
+function itemTable(list){
+  return `<div class="tblwrap"><table class="tbl"><thead><tr><th>Name</th><th>Category</th><th>Colour</th><th>Season</th><th>Brand</th><th>Material</th><th>Task</th>${S.current==='all'?'<th>Wardrobe</th>':''}</tr></thead><tbody>
+  ${list.map(i=>`<tr class="row" data-act="openItem" data-id="${i.id}">
+    <td><div class="namecell">${thumb(i,'mini')}${esc(i.name||'Untitled')}${i.fav?` <span style="color:var(--orange)">${ic('heart',13,'fill')}</span>`:''}</div></td>
+    <td><span class="pill">${esc(i.category)}</span></td><td>${colorDots(i.colors)}</td>
+    <td><div class="pills">${(i.seasons||[]).map(s=>`<span class="pill t">${esc(s)}</span>`).join('')}</div></td>
+    <td>${esc(i.brand)}</td><td>${esc(i.material)}</td>
+    <td>${i.taskText?`<span class="pill ${i.taskStatus==='Done'?'g':'b'}">${esc(i.taskStatus||'To do')}</span> <span style="color:var(--muted);font-size:12.5px">${esc(i.taskText.slice(0,28))}${i.taskText.length>28?'…':''}</span>`:''}</td>
+    ${S.current==='all'?`<td>${esc(W(i.wardrobeId)?.icon||'')} ${esc(W(i.wardrobeId)?.name||'')}</td>`:''}</tr>`).join('')}
+  </tbody></table></div>`;
+}
+
+/* ---------- Wishlist ---------- */
+function pageWishlist(){
+  const list=[...S.wishlist].sort((a,b)=>PRIORITY.indexOf(a.priority)-PRIORITY.indexOf(b.priority));
+  const total=list.reduce((a,x)=>a+(Number(x.price)||0),0);
+  const pc={High:'b',Medium:'o',Low:'t'};
+  return `${pageIcon('sparkles','var(--tiff-ink)')}<h1 class="title">Wishlist</h1>
+  <p class="lede">Things you’ve spotted online. Save the link, price and why you want it. When you buy it, move it straight into a wardrobe.</p>
+  <div class="stats"><div class="stat"><div class="n">${list.length}</div><div class="l">Saved items</div></div><div class="stat"><div class="n">${money(total)}</div><div class="l">If you bought it all</div></div><div class="stat"><div class="n" style="color:var(--burg)">${list.filter(x=>x.priority==='High').length}</div><div class="l">High priority</div></div></div>
+  ${!list.length?`<div class="empty"><div class="big">${ic('sparkles',34)}</div>Nothing saved yet.<div style="margin-top:12px"><button class="btn primary" data-act="newWish">${ic('plus',15)} Save an item</button></div></div>`:
+  `<div class="gallery">${list.map(x=>`<div class="card" data-act="openWish" data-id="${x.id}">${thumb(x)}
+    <div class="flag"><span class="pill w">${money(x.price)}</span></div>
+    <div class="body"><div class="nm">${esc(x.name||'Untitled')}</div><div class="br">${esc(x.brand||'No brand')}</div>
+    <div class="pills">${x.priority?`<span class="pill ${pc[x.priority]||''}">${ic('flag',11)} ${esc(x.priority)}</span>`:''}<span class="pill">${esc(x.category)}</span>${colorDots(x.colors)}</div>
+    <div style="display:flex;gap:6px;margin-top:10px">${x.url?`<a class="btn sm" href="${esc(x.url)}" target="_blank" rel="noopener" data-stop="1">${ic('external',13)} Open link</a>`:''}<button class="btn sm green" data-act="wishToCloset" data-id="${x.id}">${ic('check',13)} I bought it</button></div>
+    </div></div>`).join('')}</div>`}`;
+}
+
+/* ---------- Outfits ---------- */
+function collage(ids){
+  const its=ids.map(I).filter(Boolean).slice(0,4);
+  if(!its.length) return `<div class="collage n1"><div class="th"></div></div>`;
+  return `<div class="collage n${its.length}">${its.map(x=>thumb(x)).join('')}</div>`;
+}
+function outfitWarnings(o){
+  const w=[];
+  o.itemIds.forEach(id=>{ const i=I(id); if(!i){ w.push('An item was deleted'); return; }
+    if(i.wardrobeId!==o.wardrobeId) w.push(`${i.name} is in ${W(i.wardrobeId)?.name||'another wardrobe'}`);
+    if(i.taskText&&i.taskStatus!=='Done') w.push(`${i.name}: ${i.taskText}`); });
+  return w;
+}
+function pageOutfits(){
+  const list=scoped(S.outfits);
+  return `${pageIcon('layers','var(--orange)')}<h1 class="title">Outfits</h1>
+  <p class="lede">Looks built only from things you own. If a piece is in another wardrobe or needs a fix, the outfit tells you.</p>
+  ${!list.length?`<div class="empty"><div class="big">${ic('layers',34)}</div>No outfits here yet.<div style="margin-top:12px"><button class="btn primary" data-act="newOutfit">${ic('plus',15)} Build an outfit</button></div></div>`:
+  `<div class="gallery">${list.map(o=>{const w=outfitWarnings(o); return `<div class="card" data-act="openOutfit" data-id="${o.id}">${collage(o.itemIds)}
+    <div class="body"><div class="nm">${esc(o.name||'Untitled outfit')}</div><div class="br">${o.itemIds.length} pieces${S.current==='all'?` · ${esc(W(o.wardrobeId)?.icon||'')} ${esc(W(o.wardrobeId)?.name||'')}`:''}</div>
+    <div class="pills">${(o.occasions||[]).map(x=>`<span class="pill o">${esc(x)}</span>`).join('')}${(o.seasons||[]).map(x=>`<span class="pill t">${esc(x)}</span>`).join('')}</div>
+    ${w.length?`<div class="warn">${ic('alert',13)}<span>${esc(w[0])}${w.length>1?` (+${w.length-1} more)`:''}</span></div>`:''}</div></div>`;}).join('')}</div>`}`;
+}
+
+/* ---------- Travel sudoku ---------- */
+function tripDays(t){
+  if(t.start&&t.end){ const d=Math.round((new Date(t.end)-new Date(t.start))/864e5)+1; if(d>0) return d; }
+  return Number(t.days)||1;
+}
+function pageTrips(){
+  return `${pageIcon('luggage','var(--green)')}<h1 class="title">Travel sudoku</h1>
+  <p class="lede">Pack a small capsule that works as a grid. Each column is a type of garment, each row a colour story. Pick any one piece from every column and you have an outfit, so 16 pieces can give you up to 256 looks.</p>
+  <div class="callout tiff"><div class="ci" style="color:var(--tiff-ink)">${ic('bulb',20)}</div><div><b>How it works.</b> 1) Choose the wardrobe you’re packing from. 2) Label the columns (e.g. Tops · Bottoms · Layers · Shoes) and rows (colour stories, like “Navy” or “Camel”). 3) Fill every cell so each row is cohesive and every piece works with the others. 4) Generate a daily plan and a packing list.</div></div>
+  ${!S.trips.length?`<div class="empty"><div class="big">${ic('luggage',34)}</div>No trips yet.<div style="margin-top:12px"><button class="btn primary" data-act="newTrip">${ic('plus',15)} Plan a trip</button></div></div>`:
+  `<div class="tripcards">${S.trips.map(t=>{const filled=Object.values(t.grid).filter(Boolean).length; return `<div class="tripcard" data-act="openTrip" data-id="${t.id}">
+    <div class="mini-grid" style="grid-template-columns:repeat(${t.cols},1fr)">${[...Array(t.rows*t.cols)].map((_,k)=>{const id=t.grid[Math.floor(k/t.cols)+'-'+(k%t.cols)]; return id&&I(id)?thumb(I(id)):'<div class="bl"></div>';}).join('')}</div>
+    <div class="nm" style="font-family:var(--serif);font-size:22px;font-weight:700">${esc(t.name||'Untitled trip')}</div>
+    <div class="br" style="color:var(--muted);font-size:12.5px;margin-top:2px">${tripDays(t)} days · from ${esc(W(t.wardrobeId)?.icon||'')} ${esc(W(t.wardrobeId)?.name||'')} · ${filled}/${t.rows*t.cols} packed</div></div>`;}).join('')}</div>`}`;
+}
+function tripStats(t){
+  const cols=[...Array(t.cols).keys()].map(c=>[...Array(t.rows).keys()].map(r=>t.grid[r+'-'+c]).filter(id=>id&&I(id)));
+  const combos=cols.some(c=>!c.length)?0:cols.reduce((a,c)=>a*c.length,1);
+  const ids=cols.flat();
+  const palette=[...new Set(ids.flatMap(id=>I(id).colors||[]))];
+  const rowsOk=[...Array(t.rows).keys()].map(r=>{
+    const its=[...Array(t.cols).keys()].map(c=>t.grid[r+'-'+c]).filter(id=>id&&I(id)).map(I);
+    if(its.length<2) return null;
+    const shared=(its[0].colors||[]).filter(c=>its.every(x=>(x.colors||[]).includes(c)));
+    const neutrals=['Black','White','Ivory','Cream','Beige','Camel','Grey','Charcoal','Navy','Brown'];
+    const nonNeutral=new Set(its.flatMap(x=>x.colors||[]).filter(c=>!neutrals.includes(c)));
+    return shared.length?'shared':(nonNeutral.size<=1?'neutral':'mixed');
+  });
+  const seasons=[...new Set(ids.flatMap(id=>I(id).seasons||[]))];
+  return {cols,combos,ids,palette,rowsOk,seasons};
+}
+function pageTrip(){
+  const t=S.trips.find(x=>x.id===UI.tripId); if(!t){ UI.tripId=null; return pageTrips(); }
+  const st=tripStats(t), days=tripDays(t), total=t.rows*t.cols, filled=st.ids.length;
+  const fullCols=st.cols.filter(c=>c.length===t.rows).length;
+  const rc={shared:['ok',ic('check',13),'shares a colour'],neutral:['ok',ic('check',13),'neutral base'],mixed:['no',ic('alertc',13),'mixed colours']};
+  const grid=`<div class="sudoku" style="--cols:${t.cols};grid-template-columns:120px repeat(${t.cols},minmax(0,1fr))">
+    <div></div>${t.colLabels.slice(0,t.cols).map((l,c)=>`<div class="h"><input id="cl${c}" data-kind="trip" data-id="${t.id}" data-f="colLabels" data-i="${c}" value="${esc(l)}"></div>`).join('')}
+    ${[...Array(t.rows).keys()].map(r=>`<div class="rh"><input id="rl${r}" data-kind="trip" data-id="${t.id}" data-f="rowLabels" data-i="${r}" value="${esc(t.rowLabels[r]||'')}" placeholder="Row ${r+1}">
+       ${st.rowsOk[r]?`<span class="rowcheck" style="color:${st.rowsOk[r]==='mixed'?'var(--orange)':'var(--green)'}">${rc[st.rowsOk[r]][1]}<span class="rc-t"> ${rc[st.rowsOk[r]][2]}</span></span>`:''}</div>
+      ${[...Array(t.cols).keys()].map(c=>{const id=t.grid[r+'-'+c], it=id&&I(id);
+        return it?`<div class="cell" data-act="cell" data-r="${r}" data-c="${c}">${thumb(it)}<div class="cn">${esc(it.name)}</div></div>`:`<div class="cell blank" data-act="cell" data-r="${r}" data-c="${c}">${ic('plus',22)}</div>`;}).join('')}`).join('')}
+  </div>`;
+  const plan=(t.plan||[]).filter(p=>p.every(I));
+  return `<div style="margin-bottom:6px"><button class="btn ghost sm" data-act="backTrips" style="margin-left:-8px">${ic('chevl',15)} All trips</button></div>${pageIcon('luggage','var(--green)')}
+  <input class="big-title" style="font-size:44px;margin-bottom:6px" id="tname" data-kind="trip" data-id="${t.id}" data-f="name" value="${esc(t.name)}" placeholder="Untitled trip">
+  <div class="props" style="max-width:640px;margin-bottom:18px">
+    <div class="pk"><span class="pi">${ic('wardrobe',15)}</span>Packing from</div><div class="pv"><select id="twid" data-kind="trip" data-id="${t.id}" data-f="wardrobeId">${S.wardrobes.map(w=>`<option value="${w.id}" ${w.id===t.wardrobeId?'selected':''}>${esc(w.icon)} ${esc(w.name)}</option>`).join('')}</select></div>
+    <div class="pk"><span class="pi">${ic('calendar',15)}</span>Dates</div><div class="pv" style="flex-wrap:nowrap"><input type="date" id="ts" data-kind="trip" data-id="${t.id}" data-f="start" value="${esc(t.start)}"><span style="color:var(--faint);display:inline-flex">${ic('arrow',15)}</span><input type="date" id="te" data-kind="trip" data-id="${t.id}" data-f="end" value="${esc(t.end)}"></div>
+    ${!(t.start&&t.end)?`<div class="pk"><span class="pi">${ic('hash',15)}</span>Days</div><div class="pv"><input type="number" min="1" max="60" id="td" data-kind="trip" data-id="${t.id}" data-f="days" value="${esc(t.days)}"></div>`:''}
+    <div class="pk"><span class="pi">${ic('grid',15)}</span>Grid</div><div class="pv">${[[3,3],[3,4],[4,4]].map(([r,c])=>`<span class="chip ${t.rows===r&&t.cols===c?'on':''}" data-act="gridSize" data-r="${r}" data-c="${c}">${r} × ${c}</span>`).join('')}</div>
+  </div>
+  <div class="sudoku-wrap">
+    <div>${grid}
+      <div style="display:flex;gap:8px;margin-top:18px;flex-wrap:wrap">
+        <button class="btn primary" data-act="genPlan">${ic('sparkles',15)} Plan ${days} days</button>
+        <button class="btn" data-act="packList">${ic('clipboard',15)} Packing list</button>
+        <button class="btn ghost" data-act="clearGrid">Clear grid</button>
+        <div class="spacer"></div><button class="btn ghost" data-act="delTrip" style="color:var(--burg)">Delete trip</button>
+      </div>
+      ${plan.length?`<div class="plan"><h3 class="sub">Daily plan</h3>
+        ${plan.map((p,d)=>`<div class="day"><div class="dl">Day ${d+1}${t.start?`<small>${new Date(new Date(t.start).getTime()+d*864e5).toLocaleDateString('en-IE',{weekday:'short',day:'numeric',month:'short'})}</small>`:''}</div>
+          <div class="its">${p.map(id=>`<div class="s" title="${esc(I(id).name)}">${thumb(I(id))}</div>`).join('')}</div>
+          <button class="btn sm ghost" data-act="reroll" data-d="${d}">${ic('refresh',13)} Swap</button></div>`).join('')}
+        <div style="display:flex;gap:8px;margin-top:14px"><button class="btn green" data-act="savePlan">${ic('check',15)} Save all as outfits</button><button class="btn" data-act="genPlan">${ic('shuffle',15)} Reshuffle</button></div></div>`:''}
+    </div>
+    <div>
+      <div class="side-card"><h4>Possible outfits</h4><div class="big-num">${st.combos}</div><div style="color:var(--muted);font-size:12.5px;margin-top:4px">${st.combos?`one piece from each of ${t.cols} columns`:'fill at least one cell in every column'}</div></div>
+      <div class="side-card"><h4>Sudoku rules</h4>
+        <div class="check"><span class="${filled===total?'ok':'no'}">${filled===total?ic('check',14):ic('alertc',14)}</span><span>${filled}/${total} cells packed</span></div>
+        <div class="check"><span class="${fullCols===t.cols?'ok':'no'}">${fullCols===t.cols?ic('check',14):ic('alertc',14)}</span><span>${fullCols}/${t.cols} columns complete</span></div>
+        <div class="check"><span class="${st.rowsOk.every(x=>x!=='mixed')?'ok':'no'}">${st.rowsOk.every(x=>x!=='mixed')?ic('check',14):ic('alertc',14)}</span><span>Every row reads as one colour story</span></div>
+        <div class="check"><span class="${st.palette.length<=5?'ok':'no'}">${st.palette.length<=5?ic('check',14):ic('alertc',14)}</span><span>Palette of ${st.palette.length} colour${st.palette.length===1?'':'s'} ${st.palette.length>5?'(try 5 or fewer)':''}</span></div>
+        <div class="check"><span class="${days<=st.combos?'ok':'no'}">${days<=st.combos?ic('check',14):ic('alertc',14)}</span><span>${days} days, ${st.combos} looks, ${days<=st.combos?'no repeats needed':'some repeats'}</span></div>
+      </div>
+      <div class="side-card"><h4>Trip palette</h4><div class="pills">${st.palette.map(c=>`<span class="pill"><span class="dot" style="background:${COLORS[c]}"></span>${esc(c)}</span>`).join('')||'<span style="color:var(--faint)">None yet</span>'}</div>
+        ${st.seasons.length?`<h4 style="margin-top:14px">Seasons covered</h4><div class="pills">${st.seasons.map(s=>`<span class="pill t">${esc(s)}</span>`).join('')}</div>`:''}</div>
+    </div>
+  </div>`;
+}
+function generatePlan(t){
+  const st=tripStats(t); if(!st.combos) return [];
+  let combos=[[]]; st.cols.forEach(col=>{ combos=combos.flatMap(cb=>col.map(x=>[...cb,x])); });
+  const use={}, used=new Set(), plan=[];
+  for(let d=0; d<tripDays(t); d++){
+    combos.sort(()=>Math.random()-.5);
+    let best=null, bs=Infinity;
+    for(const cb of combos){ const s=cb.reduce((a,x)=>a+(use[x]||0),0)+(used.has(cb.join())?1000:0); if(s<bs){ bs=s; best=cb; } }
+    best.forEach(x=>use[x]=(use[x]||0)+1); used.add(best.join()); plan.push(best);
+  }
+  return plan;
+}
+
+/* ---------- Repairs ---------- */
+function pageRepairs(){
+  const list=scoped(S.items).filter(i=>i.taskText);
+  const col=(s,icn,cls)=>{const its=list.filter(i=>(i.taskStatus||'To do')===s); return `<div class="col"><div class="col-h"><span class="pill ${cls}">${icn} ${s}</span><span style="color:var(--faint);font-size:12px">${its.length}</span></div>
+    ${its.map(i=>`<div class="tcard" data-act="openItem" data-id="${i.id}">${thumb(i)}<div><div style="font-weight:500;font-size:13.5px">${esc(i.name)}</div><div class="tt">${esc(i.taskText)}</div>
+      <div class="pills">${i.taskWhere?`<span class="pill">${esc(i.taskWhere)}</span>`:''}${i.taskDue?`<span class="pill o">Due ${esc(new Date(i.taskDue).toLocaleDateString('en-IE',{day:'numeric',month:'short'}))}</span>`:''}${S.current==='all'?`<span class="pill">${esc(W(i.wardrobeId)?.icon||'')} ${esc(W(i.wardrobeId)?.name||'')}</span>`:''}</div>
+      <div class="mv">${TASK_STATUS.filter(x=>x!==s).map(x=>`<button class="btn sm" data-act="taskMove" data-id="${i.id}" data-s="${x}">${ic('arrow',12)} ${x}</button>`).join('')}</div></div></div>`).join('')||'<div style="color:var(--faint);font-size:12.5px;padding:6px">Nothing here</div>'}</div>`;};
+  return `${pageIcon('scissors','var(--burg)')}<h1 class="title">Repairs</h1>
+  <p class="lede">Every item with a task: hems, buttons, resoling, dry cleaning. Add a task from any item’s page; it shows up here.</p>
+  <div class="board">${col('To do',ic('circle',12),'b')}${col('In progress',ic('clock',12),'o')}${col('Done',ic('checkc',12),'g')}</div>`;
+}
+
+/* ---------- Data ---------- */
+function pageData(){
+  return `${pageIcon('sliders','var(--ink)')}<h1 class="title">Data & settings</h1>
+  <p class="lede">Raestyle keeps everything on this device. Export a backup to move it to another device, or reset to the demo data.</p>
+  <div class="callout orange"><div class="ci" style="color:#A8470C">${ic('alert',20)}</div><div>Your data lives on this device. Deleting the app or clearing Safari’s website data removes it. Export a backup now and then.</div></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button class="btn" data-act="exportData">${ic('upload',15)} Export backup</button><button class="btn" data-act="importData">${ic('download',15)} Import backup</button>
+    <button class="btn" data-act="resetDemo">${ic('refresh',15)} Load demo data</button><button class="btn danger" data-act="clearAll">${ic('trash',15)} Start empty</button>
+  </div>
+  <div class="divider"></div>
+  <h3 class="sub">Totals</h3>
+  <div class="stats"><div class="stat"><div class="n">${S.wardrobes.length}</div><div class="l">Wardrobes</div></div><div class="stat"><div class="n">${S.items.length}</div><div class="l">Items</div></div><div class="stat"><div class="n">${S.outfits.length}</div><div class="l">Outfits</div></div><div class="stat"><div class="n">${S.trips.length}</div><div class="l">Trips</div></div></div>`;
+}
+
+/* ---------- Peek (side panel) ---------- */
+function prop(icon,label,html){ return `<div class="pk"><span class="pi">${ic(icon,15)}</span>${label}</div><div class="pv">${html}</div>`; }
+function pText(kind,o,f,ph='Empty',type='text'){ return `<input type="${type}" id="p_${f}" data-kind="${kind}" data-id="${o.id}" data-f="${f}" value="${esc(o[f])}" placeholder="${ph}">`; }
+function pSelect(kind,o,f,opts,blank){ return `<select id="p_${f}" data-kind="${kind}" data-id="${o.id}" data-f="${f}">${blank?`<option value="">${blank}</option>`:''}${opts.map(x=>`<option ${o[f]===x?'selected':''}>${esc(x)}</option>`).join('')}</select>`; }
+function pMulti(kind,o,f,opts){ return opts.map(x=>`<span class="chip ${(o[f]||[]).includes(x)?'on':''}" data-act="toggle" data-kind="${kind}" data-id="${o.id}" data-f="${f}" data-v="${esc(x)}">${esc(x)}</span>`).join(''); }
+function pColors(kind,o){ return Object.keys(COLORS).map(c=>`<span class="chip c ${(o.colors||[]).includes(c)?'on':''}" data-act="toggle" data-kind="${kind}" data-id="${o.id}" data-f="colors" data-v="${esc(c)}"><span class="dot" style="background:${COLORS[c]}"></span>${(o.colors||[]).includes(c)?esc(c):''}</span>`).join(''); }
+function renderPeek(){
+  if(!UI.peek) return '';
+  const {kind,id}=UI.peek;
+  const o=kind==='item'?I(id):S.wishlist.find(x=>x.id===id);
+  if(!o){ UI.peek=null; return ''; }
+  let body='';
+  if(kind==='item'){
+    body=`
+    <input class="big-title" id="p_name" data-kind="item" data-id="${o.id}" data-f="name" value="${esc(o.name)}" placeholder="Untitled item">
+    <div class="props">
+      ${prop('wardrobe','Wardrobe',`<select id="p_wid" data-kind="item" data-id="${o.id}" data-f="wardrobeId">${S.wardrobes.map(w=>`<option value="${w.id}" ${w.id===o.wardrobeId?'selected':''}>${esc(w.icon)} ${esc(w.name)}</option>`).join('')}</select>`)}
+      ${prop('list','Category',pSelect('item',o,'category',CATS))}
+      ${prop('palette','Colour',pColors('item',o))}
+      ${prop('sun','Season',pMulti('item',o,'seasons',SEASONS))}
+      ${prop('tag','Brand',pText('item',o,'brand'))}
+      ${prop('waves','Material',pText('item',o,'material'))}
+      ${prop('star','Occasion',pMulti('item',o,'occasions',OCCASIONS))}
+      ${prop('euro','Price paid',pText('item',o,'price','Empty','number'))}
+      ${prop('calendar','Purchased',pText('item',o,'purchased','','date'))}
+      ${prop('heart','Favourite',`<span class="chip ${o.fav?'on':''}" data-act="flag" data-kind="item" data-id="${o.id}" data-f="fav">${o.fav?ic('heart',13,'fill')+' Favourite':ic('heart',13)+' Not yet'}</span>`)}
+    </div>
+    <div class="divider"></div>
+    <div class="callout task"><div class="ci" style="color:var(--burg)">${ic('scissors',20)}</div><div style="flex:1">
+      <div style="font-weight:600;margin-bottom:6px">Task</div>
+      <div class="field" style="margin-bottom:8px"><input id="p_task" data-kind="item" data-id="${o.id}" data-f="taskText" value="${esc(o.taskText)}" placeholder="e.g. Take up hem, replace button, dry clean…"></div>
+      <div class="row2" style="gap:8px"><div class="field" style="margin:0"><select id="p_ts" data-kind="item" data-id="${o.id}" data-f="taskStatus"><option value="">Status…</option>${TASK_STATUS.map(x=>`<option ${o.taskStatus===x?'selected':''}>${x}</option>`).join('')}</select></div>
+      <div class="field" style="margin:0"><select id="p_tw" data-kind="item" data-id="${o.id}" data-f="taskWhere"><option value="">Where…</option>${TASK_WHERE.map(x=>`<option ${o.taskWhere===x?'selected':''}>${x}</option>`).join('')}</select></div></div>
+      <div class="field" style="margin:8px 0 0"><label>Due</label><input type="date" id="p_td" data-kind="item" data-id="${o.id}" data-f="taskDue" value="${esc(o.taskDue)}"></div>
+    </div></div>
+    <h3 class="sub">Notes</h3>
+    <textarea class="notes" id="p_notes" data-kind="item" data-id="${o.id}" data-f="notes" placeholder="Care instructions, styling ideas, where you bought it…">${esc(o.notes)}</textarea>
+    ${usedIn(o.id)}`;
+  } else {
+    body=`
+    <input class="big-title" id="p_name" data-kind="wish" data-id="${o.id}" data-f="name" value="${esc(o.name)}" placeholder="What did you spot?">
+    <div class="props">
+      ${prop('link','Link',pText('wish',o,'url','Paste the product link','url'))}
+      ${prop('tag','Brand',pText('wish',o,'brand'))}
+      ${prop('euro','Price',pText('wish',o,'price','Empty','number'))}
+      ${prop('flag','Priority',pSelect('wish',o,'priority',PRIORITY))}
+      ${prop('list','Category',pSelect('wish',o,'category',CATS))}
+      ${prop('palette','Colour',pColors('wish',o))}
+      ${prop('sun','Season',pMulti('wish',o,'seasons',SEASONS))}
+    </div>
+    ${o.url?`<div style="margin-top:12px"><a class="btn" href="${esc(o.url)}" target="_blank" rel="noopener">${ic('external',14)} Open ${esc(hostOf(o.url))}</a></div>`:''}
+    <div class="divider"></div>
+    <h3 class="sub">Why I want it</h3>
+    <textarea class="notes" id="p_notes" data-kind="wish" data-id="${o.id}" data-f="notes" placeholder="What would it go with? What would it replace?">${esc(o.notes)}</textarea>
+    <div class="callout tiff" style="margin-top:16px"><div class="ci" style="color:var(--tiff-ink)">${ic('bag',20)}</div><div style="flex:1">Bought it? Move it into a wardrobe with all its details.<div style="margin-top:8px"><button class="btn green" data-act="wishToCloset" data-id="${o.id}">${ic('check',15)} Move to ${esc((W(S.current)||S.wardrobes[0])?.name||'closet')}</button></div></div></div>`;
+  }
+  return `<div class="shade" data-act="closePeek"></div><div class="panel">
+    <div class="panel-top"><button class="btn ghost sm" data-act="closePeek">${ic('x',14)} Close</button><span style="color:var(--muted);font-size:13px">${kind==='item'?'Item':'Wishlist'}</span><div class="spacer"></div>
+      <button class="btn ghost sm" data-act="dupe" data-kind="${kind}" data-id="${o.id}">Duplicate</button>
+      <button class="btn ghost sm" style="color:var(--burg)" data-act="delete" data-kind="${kind}" data-id="${o.id}">Delete</button></div>
+    <div class="panel-body" data-keep="peek">
+      <div class="hero">${thumb(o)}<div class="acts">
+        <label class="btn sm" style="cursor:pointer">${ic('camera',14)} ${o.image?'Change':'Add'} photo<input type="file" accept="image/*" data-img="${kind}" data-id="${o.id}" style="display:none"></label>
+        ${o.image?`<button class="btn sm" data-act="removeImg" data-kind="${kind}" data-id="${o.id}">Remove</button>`:''}</div></div>
+      ${body}
+    </div></div>`;
+}
+function hostOf(u){ try{ return new URL(u).hostname.replace(/^www\./,''); }catch(e){ return 'link'; } }
+function usedIn(id){
+  const os=S.outfits.filter(o=>o.itemIds.includes(id)), ts=S.trips.filter(t=>Object.values(t.grid).includes(id));
+  if(!os.length&&!ts.length) return '';
+  return `<div class="divider"></div><h3 class="sub">Used in</h3><div class="pills">${os.map(o=>`<span class="pill o">${ic('layers',11)} ${esc(o.name)}</span>`).join('')}${ts.map(t=>`<span class="pill t">${ic('luggage',11)} ${esc(t.name)}</span>`).join('')}</div>`;
+}
+
+/* ---------- Modals ---------- */
+function renderModal(){
+  const m=UI.modal; if(!m) return '';
+  let inner='', cls='';
+  if(m.type==='wardrobe'){
+    const d=m.draft; cls='sm';
+    inner=`<div class="modal-h"><span style="font-size:28px">${esc(d.icon)}</span><h2>${m.edit?'Edit wardrobe':'New wardrobe'}</h2></div>
+    <div class="modal-b">
+      <div class="field"><label>Name</label><input id="m_name" data-d="name" value="${esc(d.name)}" placeholder="e.g. Rio, Summer house, Office locker"></div>
+      <div class="field"><label>Where is it?</label><input id="m_city" data-d="city" value="${esc(d.city)}" placeholder="City or place"></div>
+      <div class="field"><label>Icon</label><div class="emoji-row">${EMOJIS.map(e=>`<span class="${d.icon===e?'on':''}" data-act="dset" data-k="icon" data-v="${e}">${e}</span>`).join('')}</div></div>
+      <div class="field"><label>Accent colour</label><div class="swatches">${Object.entries(BRAND).map(([k,v])=>`<span class="${d.accent===k?'on':''}" style="background:${v}" data-act="dset" data-k="accent" data-v="${k}" title="${k}"></span>`).join('')}</div></div>
+      <div class="field"><label>Notes</label><input id="m_notes" data-d="notes" value="${esc(d.notes)}" placeholder="What lives here?"></div>
+      ${!m.edit?`<div class="field"><label>Start from</label><select id="m_clone" data-d="clone"><option value="">Empty wardrobe</option>${S.wardrobes.map(w=>`<option value="${w.id}" ${d.clone===w.id?'selected':''}>Copy all items from ${esc(w.name)}</option>`).join('')}</select></div>`:
+      `<div class="divider"></div><div class="field"><label>Delete this wardrobe</label>${S.wardrobes.length>1?`<div style="display:flex;gap:8px"><select id="m_moveto" data-d="moveTo">${S.wardrobes.filter(w=>w.id!==m.edit).map(w=>`<option value="${w.id}" ${d.moveTo===w.id?'selected':''}>Move its items to ${esc(w.name)}</option>`).join('')}</select><button class="btn danger" data-act="deleteWardrobe">Delete</button></div>`:'<div style="color:var(--faint);font-size:13px">You need at least one wardrobe.</div>'}</div>`}
+    </div>
+    <div class="modal-f"><button class="btn ghost" data-act="modalClose">Cancel</button><button class="btn primary" data-act="saveWardrobe">${m.edit?'Save':'Create wardrobe'}</button></div>`;
+  }
+  if(m.type==='outfit'){
+    const d=m.draft;
+    const pool=S.items.filter(i=>i.wardrobeId===d.wardrobeId);
+    const tabs=['All','Tops','Knits','Bottoms','Dresses','Layers','Shoes','Accessories'];
+    const GROUP={Shirt:'Tops','Tee':'Tops',Blouse:'Tops',Top:'Tops',Swimwear:'Tops',Activewear:'Tops',Loungewear:'Tops',Jumper:'Knits',Cardigan:'Knits',Trousers:'Bottoms',Jeans:'Bottoms',Skirt:'Bottoms',Shorts:'Bottoms',Dress:'Dresses',Jumpsuit:'Dresses',Blazer:'Layers',Jacket:'Layers',Coat:'Layers',Shoes:'Shoes',Trainers:'Shoes',Boots:'Shoes',Sandals:'Shoes',Bag:'Accessories',Accessory:'Accessories',Jewellery:'Accessories'};
+    const shown=pool.filter(i=>UI.pickTab==='All'||GROUP[i.category]===UI.pickTab);
+    inner=`<div class="modal-h"><span style="color:var(--orange);display:inline-flex">${ic('layers',24)}</span><h2>${m.edit?'Edit outfit':'New outfit'}</h2></div>
+    <div class="modal-b" data-keep="om">
+      <div class="row2"><div class="field"><label>Name</label><input id="m_oname" data-d="name" value="${esc(d.name)}" placeholder="e.g. Office Monday"></div>
+      <div class="field"><label>Wardrobe</label><select id="m_ow" data-d="wardrobeId">${S.wardrobes.map(w=>`<option value="${w.id}" ${w.id===d.wardrobeId?'selected':''}>${esc(w.icon)} ${esc(w.name)}</option>`).join('')}</select></div></div>
+      <div class="field"><label>Occasion</label><div class="pills">${OCCASIONS.map(x=>`<span class="chip ${d.occasions.includes(x)?'on':''}" data-act="dtoggle" data-k="occasions" data-v="${x}">${x}</span>`).join('')}</div></div>
+      <div class="field"><label>Season</label><div class="pills">${SEASONS.map(x=>`<span class="chip ${d.seasons.includes(x)?'on':''}" data-act="dtoggle" data-k="seasons" data-v="${x}">${x}</span>`).join('')}</div></div>
+      <div class="field"><label>In this outfit (${d.itemIds.length}). Tap a piece to remove it.</label><div class="strip">${d.itemIds.map(I).filter(Boolean).map(i=>`<div class="s" data-act="opick" data-id="${i.id}" title="${esc(i.name)}">${thumb(i)}</div>`).join('')||'<span style="color:var(--faint);font-size:13px;align-self:center;padding-left:6px">Pick pieces from your wardrobe below.</span>'}</div></div>
+      <div class="toolbar" style="margin:4px 0 0">${tabs.map(t=>`<button class="tab ${UI.pickTab===t?'on':''}" data-act="pickTab" data-v="${t}">${t}</button>`).join('')}</div>
+      <div class="picker">${shown.map(i=>`<div class="pick ${d.itemIds.includes(i.id)?'on':''}" data-act="opick" data-id="${i.id}">${thumb(i)}<div class="pn">${esc(i.name)}</div></div>`).join('')||'<div style="color:var(--faint);padding:10px">No items in this category.</div>'}</div>
+      <div class="field" style="margin-top:14px"><label>Notes</label><input id="m_onotes" data-d="notes" value="${esc(d.notes)}" placeholder="Jewellery, hair, which bag…"></div>
+    </div>
+    <div class="modal-f">${m.edit?`<button class="btn ghost" style="color:var(--burg);margin-right:auto" data-act="delOutfit">Delete</button>`:''}<button class="btn ghost" data-act="modalClose">Cancel</button><button class="btn primary" data-act="saveOutfit">Save outfit</button></div>`;
+  }
+  if(m.type==='trip'){
+    const d=m.draft; cls='sm';
+    inner=`<div class="modal-h"><span style="color:var(--green);display:inline-flex">${ic('luggage',24)}</span><h2>New trip</h2></div>
+    <div class="modal-b">
+      <div class="field"><label>Trip name</label><input id="m_tn" data-d="name" value="${esc(d.name)}" placeholder="e.g. Paris in spring"></div>
+      <div class="field"><label>Packing from</label><select id="m_tw" data-d="wardrobeId">${S.wardrobes.map(w=>`<option value="${w.id}" ${w.id===d.wardrobeId?'selected':''}>${esc(w.icon)} ${esc(w.name)}</option>`).join('')}</select></div>
+      <div class="row2"><div class="field"><label>From</label><input type="date" id="m_ts" data-d="start" value="${esc(d.start)}"></div><div class="field"><label>To</label><input type="date" id="m_te" data-d="end" value="${esc(d.end)}"></div></div>
+      <div class="field"><label>Grid size</label><div class="pills">${[[3,3],[3,4],[4,4]].map(([r,c])=>`<span class="chip ${d.rows===r&&d.cols===c?'on':''}" data-act="dgrid" data-r="${r}" data-c="${c}">${r} × ${c} · ${r*c} pieces</span>`).join('')}</div></div>
+    </div>
+    <div class="modal-f"><button class="btn ghost" data-act="modalClose">Cancel</button><button class="btn primary" data-act="saveTrip">Create trip</button></div>`;
+  }
+  if(m.type==='cell'){
+    const t=S.trips.find(x=>x.id===UI.tripId); const label=t.colLabels[m.c]; const cats=colCats(label);
+    const placed=new Set(Object.entries(t.grid).filter(([k])=>k!==m.r+'-'+m.c).map(([,v])=>v));
+    const pool=S.items.filter(i=>i.wardrobeId===t.wardrobeId&&(UI.pickAll||!cats||cats.includes(i.category)));
+    const cur=t.grid[m.r+'-'+m.c];
+    inner=`<div class="modal-h"><span style="color:var(--green);display:inline-flex">${ic('grid',24)}</span><h2>${esc(t.rowLabels[m.r]||'Row '+(m.r+1))} · ${esc(label)}</h2></div>
+    <div class="modal-b" data-keep="cm">
+      <div style="display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px">From ${esc(W(t.wardrobeId)?.icon||'')} ${esc(W(t.wardrobeId)?.name||'')} ${cats?`· showing ${esc(label.toLowerCase())}`:''}<div class="spacer"></div>${cats?`<span class="chip ${UI.pickAll?'on':''}" data-act="pickAll">Show every category</span>`:''}</div>
+      <div class="picker">${pool.map(i=>`<div class="pick ${cur===i.id?'on':''} ${placed.has(i.id)?'off':''}" ${placed.has(i.id)?'title="Already in the grid"':`data-act="pickCell" data-id="${i.id}"`}>${thumb(i)}<div class="pn">${esc(i.name)}</div></div>`).join('')||'<div style="color:var(--faint);padding:10px">No matching items in this wardrobe.</div>'}</div>
+    </div>
+    <div class="modal-f">${cur?`<button class="btn ghost" style="color:var(--burg);margin-right:auto" data-act="clearCell">Empty this cell</button>`:''}<button class="btn ghost" data-act="modalClose">Done</button></div>`;
+  }
+  if(m.type==='text'){
+    inner=`<div class="modal-h"><h2>${esc(m.title)}</h2></div><div class="modal-b"><p style="color:var(--muted);margin-top:0">${esc(m.help||'')}</p>
+      <textarea class="notes" id="m_text" style="min-height:260px;font-family:ui-monospace,Menlo,monospace;font-size:12.5px" ${m.readonly?'readonly':''} placeholder="${m.readonly?'':'Paste your backup here'}">${esc(m.text||'')}</textarea></div>
+      <div class="modal-f"><button class="btn ghost" data-act="modalClose">Close</button>${m.readonly?`<button class="btn primary" data-act="copyText">${ic('copy',15)} Copy</button>`:`<button class="btn primary" data-act="doImport">Import</button>`}</div>`;
+  }
+  if(m.type==='confirm'){
+    cls='sm';
+    inner=`<div class="modal-h"><h2>${esc(m.title)}</h2></div><div class="modal-b"><p style="color:var(--muted);margin:0;line-height:1.5">${esc(m.text)}</p></div>
+      <div class="modal-f"><button class="btn ghost" data-act="modalClose">Cancel</button><button class="btn ${m.danger?'danger':'primary'}" data-act="confirmYes">${esc(m.yes||'Confirm')}</button></div>`;
+  }
+  return `<div class="shade" data-act="modalClose"></div><div class="modal ${cls}">${inner}</div>`;
+}
+
+/* ---------- Actions ---------- */
+let pendingConfirm=null;
+function ask(title,text,yes,fn,danger=true){ pendingConfirm=fn; UI.modal={type:'confirm',title,text,yes,danger}; render(); }
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('show'),2200); }
+function getObj(kind,id){ return {item:S.items,wish:S.wishlist,trip:S.trips,outfit:S.outfits}[kind]?.find(x=>x.id===id); }
+function defaultWid(){ return S.current==='all'?S.wardrobes[0].id:S.current; }
+function setHash(){ try{ const h='#'+UI.view; if(location.hash!==h) history.replaceState(null,'',h); }catch(e){} }
+
+const A={
+  menu(){ document.body.classList.toggle('menu'); },
+  nav(t){ const same=UI.view===t.dataset.v; UI.view=t.dataset.v; UI.tripId=null; UI.peek=null; document.body.classList.remove('menu'); setHash(); if(!same) document.getElementById('main').scrollTop=0; },
+  wardrobe(t){ S.current=t.dataset.id; save(); document.body.classList.remove('menu'); },
+  newWardrobe(){ UI.modal={type:'wardrobe',draft:{name:'',city:'',icon:'🧳',accent:'orange',notes:'',clone:''}}; },
+  editWardrobe(t){ const w=W(t.dataset.id); UI.modal={type:'wardrobe',edit:w.id,draft:{...w,moveTo:S.wardrobes.find(x=>x.id!==w.id)?.id||''}}; },
+  dset(t){ UI.modal.draft[t.dataset.k]=t.dataset.v; },
+  saveWardrobe(){
+    const m=UI.modal, d=m.draft; if(!d.name.trim()){ toast('Give the wardrobe a name'); return; }
+    if(m.edit){ Object.assign(W(m.edit),{name:d.name.trim(),city:d.city,icon:d.icon,accent:d.accent,notes:d.notes}); toast('Wardrobe saved'); }
+    else{
+      const w={id:uid(),name:d.name.trim(),city:d.city,icon:d.icon,accent:d.accent,notes:d.notes}; S.wardrobes.push(w);
+      if(d.clone){ S.items.filter(i=>i.wardrobeId===d.clone).forEach(i=>S.items.push({...i,id:uid(),wardrobeId:w.id,colors:[...i.colors],seasons:[...i.seasons],occasions:[...(i.occasions||[])]})); }
+      S.current=w.id; toast(`${w.name} created`);
+    }
+    UI.modal=null; save();
+  },
+  deleteWardrobe(){
+    const m=UI.modal, w=W(m.edit), to=m.draft.moveTo||S.wardrobes.find(x=>x.id!==w.id).id;
+    ask(`Delete ${w.name}?`,`Its ${S.items.filter(i=>i.wardrobeId===w.id).length} items, outfits and trips will move to ${W(to).name}.`,'Delete wardrobe',()=>{
+      S.items.forEach(i=>{ if(i.wardrobeId===w.id) i.wardrobeId=to; });
+      S.outfits.forEach(o=>{ if(o.wardrobeId===w.id) o.wardrobeId=to; });
+      S.trips.forEach(t=>{ if(t.wardrobeId===w.id) t.wardrobeId=to; });
+      S.wardrobes=S.wardrobes.filter(x=>x.id!==w.id); if(S.current===w.id) S.current=to; save(); toast('Wardrobe deleted');
+    });
+    return 'norender';
+  },
+  newItem(){ const it=blankItem(defaultWid()); S.items.push(it); save(); UI.view='closet'; UI.peek={kind:'item',id:it.id}; setTimeout(()=>document.getElementById('p_name')?.focus(),30); },
+  openItem(t){ UI.peek={kind:'item',id:t.dataset.id}; },
+  newWish(){ const x={id:uid(),name:'',brand:'',url:'',price:'',priority:'Medium',category:'Top',colors:[],seasons:[],notes:'',image:'',created:Date.now()}; S.wishlist.unshift(x); save(); UI.peek={kind:'wish',id:x.id}; setTimeout(()=>document.getElementById('p_name')?.focus(),30); },
+  openWish(t){ UI.peek={kind:'wish',id:t.dataset.id}; },
+  closePeek(){ UI.peek=null; },
+  toggle(t){ const o=getObj(t.dataset.kind,t.dataset.id), f=t.dataset.f, v=t.dataset.v; o[f]=o[f]||[]; o[f]=o[f].includes(v)?o[f].filter(x=>x!==v):[...o[f],v]; save(); },
+  flag(t){ const o=getObj(t.dataset.kind,t.dataset.id); o[t.dataset.f]=!o[t.dataset.f]; save(); },
+  count(t){ const o=getObj(t.dataset.kind,t.dataset.id); o[t.dataset.f]=Math.max(0,(Number(o[t.dataset.f])||0)+Number(t.dataset.d)); save(); },
+  removeImg(t){ getObj(t.dataset.kind,t.dataset.id).image=''; save(); },
+  dupe(t){ const k=t.dataset.kind, o=getObj(k,t.dataset.id), c=JSON.parse(JSON.stringify(o)); c.id=uid(); c.name=(o.name||'Untitled')+' (copy)'; (k==='item'?S.items:S.wishlist).push(c); save(); UI.peek={kind:k,id:c.id}; toast('Duplicated'); },
+  delete(t){ const k=t.dataset.kind, id=t.dataset.id, o=getObj(k,id);
+    ask(`Delete “${o.name||'Untitled'}”?`, k==='item'?'It will also be removed from any outfits and trip grids.':'It will be removed from your wishlist.','Delete',()=>{
+      if(k==='item'){ S.items=S.items.filter(x=>x.id!==id); S.outfits.forEach(o=>o.itemIds=o.itemIds.filter(x=>x!==id)); S.trips.forEach(t=>{ for(const key in t.grid) if(t.grid[key]===id) delete t.grid[key]; t.plan=[]; }); }
+      else S.wishlist=S.wishlist.filter(x=>x.id!==id);
+      UI.peek=null; save(); toast('Deleted'); });
+    return 'norender'; },
+  wishToCloset(t){ const x=S.wishlist.find(w=>w.id===t.dataset.id); const it=Object.assign(blankItem(defaultWid()),{name:x.name,brand:x.brand,category:x.category,colors:[...(x.colors||[])],seasons:[...(x.seasons||[])],price:x.price,image:x.image,notes:[x.notes,x.url].filter(Boolean).join('\n'),purchased:new Date().toISOString().slice(0,10)});
+    S.items.push(it); S.wishlist=S.wishlist.filter(w=>w.id!==x.id); save(); UI.peek={kind:'item',id:it.id}; UI.view='closet'; setHash(); toast(`Moved to ${W(it.wardrobeId).name}`); },
+  layout(t){ UI.layout=t.dataset.v; },
+  clearFilters(){ UI.q=UI.fCat=UI.fColor=UI.fSeason=UI.fStatus=''; },
+  newOutfit(){ UI.pickTab='All'; UI.modal={type:'outfit',draft:{name:'',wardrobeId:defaultWid(),itemIds:[],occasions:[],seasons:[],notes:''}}; },
+  openOutfit(t){ const o=S.outfits.find(x=>x.id===t.dataset.id); UI.pickTab='All'; UI.modal={type:'outfit',edit:o.id,draft:JSON.parse(JSON.stringify(o))}; },
+  opick(t){ const d=UI.modal.draft, id=t.dataset.id; d.itemIds=d.itemIds.includes(id)?d.itemIds.filter(x=>x!==id):[...d.itemIds,id]; },
+  pickTab(t){ UI.pickTab=t.dataset.v; },
+  dtoggle(t){ const d=UI.modal.draft, k=t.dataset.k, v=t.dataset.v; d[k]=d[k].includes(v)?d[k].filter(x=>x!==v):[...d[k],v]; },
+  saveOutfit(){ const m=UI.modal, d=m.draft; if(!d.itemIds.length){ toast('Pick at least one piece'); return; } if(!d.name.trim()) d.name='Untitled outfit';
+    if(m.edit) Object.assign(S.outfits.find(o=>o.id===m.edit),d); else S.outfits.unshift({...d,id:uid()});
+    UI.modal=null; save(); toast('Outfit saved'); },
+  delOutfit(){ const id=UI.modal.edit; ask('Delete this outfit?','The clothes stay in your wardrobe.','Delete',()=>{ S.outfits=S.outfits.filter(o=>o.id!==id); save(); }); return 'norender'; },
+  newTrip(){ UI.modal={type:'trip',draft:{name:'',wardrobeId:defaultWid(),start:'',end:'',rows:4,cols:4}}; },
+  dgrid(t){ UI.modal.draft.rows=+t.dataset.r; UI.modal.draft.cols=+t.dataset.c; },
+  saveTrip(){ const d=UI.modal.draft; const t={id:uid(),name:d.name.trim()||'Untitled trip',wardrobeId:d.wardrobeId,start:d.start,end:d.end,days:5,rows:d.rows,cols:d.cols,
+      colLabels:['Tops','Bottoms','Layers','Shoes'],rowLabels:['Story 1','Story 2','Story 3','Story 4'],grid:{},plan:[]};
+    S.trips.unshift(t); UI.modal=null; UI.tripId=t.id; save(); },
+  openTrip(t){ UI.tripId=t.dataset.id; },
+  backTrips(){ UI.tripId=null; },
+  gridSize(t){ const tr=S.trips.find(x=>x.id===UI.tripId); tr.rows=+t.dataset.r; tr.cols=+t.dataset.c; for(const k in tr.grid){ const [r,c]=k.split('-').map(Number); if(r>=tr.rows||c>=tr.cols) delete tr.grid[k]; } tr.plan=[]; save(); },
+  cell(t){ UI.pickAll=false; UI.modal={type:'cell',r:+t.dataset.r,c:+t.dataset.c}; },
+  pickAll(){ UI.pickAll=!UI.pickAll; },
+  pickCell(t){ const tr=S.trips.find(x=>x.id===UI.tripId); tr.grid[UI.modal.r+'-'+UI.modal.c]=t.dataset.id; tr.plan=[]; UI.modal=null; save(); },
+  clearCell(){ const tr=S.trips.find(x=>x.id===UI.tripId); delete tr.grid[UI.modal.r+'-'+UI.modal.c]; tr.plan=[]; UI.modal=null; save(); },
+  clearGrid(){ ask('Clear the whole grid?','Your clothes stay in the wardrobe; only the trip grid is emptied.','Clear grid',()=>{ const tr=S.trips.find(x=>x.id===UI.tripId); tr.grid={}; tr.plan=[]; save(); }); return 'norender'; },
+  genPlan(){ const tr=S.trips.find(x=>x.id===UI.tripId); const p=generatePlan(tr); if(!p.length){ toast('Put at least one piece in every column first'); return; } tr.plan=p; save(); },
+  reroll(t){ const tr=S.trips.find(x=>x.id===UI.tripId), d=+t.dataset.d, st=tripStats(tr);
+    const cur=tr.plan[d].join(); for(let k=0;k<30;k++){ const pick=st.cols.map(c=>c[Math.floor(Math.random()*c.length)]); if(pick.join()!==cur||st.combos===1){ tr.plan[d]=pick; break; } } save(); },
+  savePlan(){ const tr=S.trips.find(x=>x.id===UI.tripId); tr.plan.forEach((p,d)=>S.outfits.push({id:uid(),wardrobeId:tr.wardrobeId,name:`${tr.name} · Day ${d+1}`,itemIds:[...p],occasions:['Travel'],seasons:[],notes:''})); save(); toast(`${tr.plan.length} outfits saved`); },
+  packList(){ const tr=S.trips.find(x=>x.id===UI.tripId), st=tripStats(tr);
+    const txt=`${tr.name}: packing list (${st.ids.length} pieces, ${st.combos} outfits)\n\n`+tr.colLabels.slice(0,tr.cols).map((l,c)=>`${l.toUpperCase()}\n`+st.cols[c].map(id=>`[ ] ${I(id).name}${I(id).brand?', '+I(id).brand:''}`).join('\n')).join('\n\n');
+    UI.modal={type:'text',title:'Packing list',help:'Copy it into your notes or Notion.',text:txt,readonly:true}; },
+  delTrip(){ const id=UI.tripId; ask('Delete this trip?','The clothes stay in your wardrobe.','Delete trip',()=>{ S.trips=S.trips.filter(t=>t.id!==id); UI.tripId=null; save(); }); return 'norender'; },
+  taskMove(t){ const i=I(t.dataset.id); i.taskStatus=t.dataset.s; save(); toast(`Moved to ${t.dataset.s}`); },
+  exportData(){ UI.modal={type:'text',title:'Export backup',help:'Copy this and keep it somewhere safe. Photos are included, so it can be long.',text:JSON.stringify(S),readonly:true}; },
+  importData(){ UI.modal={type:'text',title:'Import backup',help:'Paste a backup you exported earlier. This replaces what’s here now.',text:''}; },
+  doImport(){ try{ const d=JSON.parse(document.getElementById('m_text').value); if(!d.wardrobes||!d.items) throw 0; S=d; UI.modal=null; UI.tripId=null; save(); toast('Backup imported'); }catch(e){ toast('That doesn’t look like a Raestyle backup'); } },
+  copyText(){ const ta=document.getElementById('m_text'); const done=()=>toast('Copied');
+    try{ navigator.clipboard.writeText(ta.value).then(done,()=>{ ta.select(); toast('Selected. Press Ctrl/Cmd + C to copy.'); }); }catch(e){ ta.select(); toast('Selected. Press Ctrl/Cmd + C to copy.'); } return 'norender'; },
+  resetDemo(){ ask('Load demo data?','This replaces everything with the Dublin & Rio example wardrobes.','Load demo',()=>{ S=seed(); UI.tripId=null; save(); },false); return 'norender'; },
+  clearAll(){ ask('Start with an empty workspace?','All items, outfits, wishlist and trips will be removed. Export a backup first if you want to keep them.','Start empty',()=>{ S={current:'w_home',wardrobes:[{id:'w_home',name:'Home',icon:'🏠',city:'',accent:'orange',notes:''}],items:[],wishlist:[],outfits:[],trips:[]}; UI.tripId=null; save(); }); return 'norender'; },
+  modalClose(){ UI.modal=null; },
+  confirmYes(){ UI.modal=null; const f=pendingConfirm; pendingConfirm=null; f&&f(); },
+};
+
+document.addEventListener('click',e=>{
+  if(e.target.closest('[data-stop]')){ e.stopPropagation(); return; }
+  const t=e.target.closest('[data-act]'); if(!t) return;
+  const fn=A[t.dataset.act]; if(!fn) return;
+  e.stopPropagation();
+  if(t.tagName==='A') return;
+  const r=fn(t,e); if(r!=='norender') render();
+});
+function onField(e){
+  const t=e.target;
+  if(t.dataset.ui!==undefined){ UI[t.dataset.ui]=t.value; render(); return; }
+  if(t.dataset.d!==undefined && UI.modal){ UI.modal.draft[t.dataset.d]=t.value; if(t.tagName==='SELECT') render(); return; }
+  if(t.dataset.kind && t.dataset.f){
+    const o=getObj(t.dataset.kind,t.dataset.id); if(!o) return;
+    let v=t.type==='number'?(t.value===''?'':Number(t.value)):t.value;
+    if(t.dataset.i!==undefined){ o[t.dataset.f][+t.dataset.i]=v; } else o[t.dataset.f]=v;
+    if(t.dataset.kind==='trip'&&['start','end','days','wardrobeId'].includes(t.dataset.f)) o.plan=[];
+    if(t.dataset.f==='taskText'&&v&&!o.taskStatus) o.taskStatus='To do';
+    save(); render();
+  }
+}
+document.addEventListener('input',onField);
+document.addEventListener('change',e=>{
+  const t=e.target;
+  if(t.dataset.img){ const f=t.files&&t.files[0]; if(!f) return; resizeImage(f,700).then(url=>{ const o=getObj(t.dataset.img,t.dataset.id); o.image=url; save(); render(); }).catch(()=>toast('Couldn’t read that image')); return; }
+  if(t.tagName==='SELECT'||t.type==='date') onField(e);
+});
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ if(UI.modal){ UI.modal=null; render(); } else if(UI.peek){ UI.peek=null; render(); } } });
+function resizeImage(file,max){
+  return new Promise((res,rej)=>{ const r=new FileReader(); r.onerror=rej; r.onload=()=>{ const img=new Image(); img.onerror=rej; img.onload=()=>{
+    const s=Math.min(1,max/Math.max(img.width,img.height)); const c=document.createElement('canvas'); c.width=Math.round(img.width*s); c.height=Math.round(img.height*s);
+    c.getContext('2d').drawImage(img,0,0,c.width,c.height); res(c.toDataURL('image/jpeg',.82)); }; img.src=r.result; }; r.readAsDataURL(file); });
+}
+function fromHash(){ const h=(location.hash||'').slice(1); if(['closet','wishlist','outfits','travel','repairs','data'].includes(h)){ UI.view=h; UI.tripId=null; } }
+window.addEventListener('hashchange',()=>{ fromHash(); render(); });
+(async()=>{
+S = (await load()) || seed();
+// migrate older saves to the new wording
+const fix=v=>v==='All-year'?'All year':v==='T-shirt'?'Tee':v;
+[...(S.items||[]),...(S.wishlist||[]),...(S.outfits||[])].forEach(o=>{ if(o.category) o.category=fix(o.category); if(Array.isArray(o.seasons)) o.seasons=o.seasons.map(fix); });
+if(!S.current || (S.current!=='all' && !W(S.current))) S.current=S.wardrobes[0]?.id||'all';
+fromHash(); render();
+try{ navigator.storage&&navigator.storage.persist&&navigator.storage.persist().catch(()=>{}); }catch(e){}
+try{ if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js').catch(()=>{}); }catch(e){}
+})();
+</script>
+</body>
+</html>
